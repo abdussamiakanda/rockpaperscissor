@@ -842,7 +842,7 @@ export default function Game() {
                   <span>Choice locked in!</span>
                 </motion.div>
               )}
-              <div className="flex justify-center items-center space-x-4 md:space-x-6">
+              <div className="flex justify-center items-center space-x-1.5 sm:space-x-3 md:space-x-4 lg:space-x-6 w-full">
                 {Object.entries(CHOICES).map(([key, choice]) => {
                   const Icon = choice.icon
                   const isSelected = selectedChoice === key
@@ -853,7 +853,7 @@ export default function Game() {
                       whileTap={canPlay && !selectedChoice ? { scale: 0.95 } : {}}
                       onClick={() => makeChoice(key)}
                       disabled={!canPlay || selectedChoice}
-                      className={`relative p-6 md:p-8 rounded-2xl transition-all border-2 ${
+                      className={`relative w-[30%] sm:w-auto sm:min-w-[120px] md:min-w-[140px] lg:min-w-[160px] p-2.5 sm:p-4 md:p-6 lg:p-8 rounded-xl sm:rounded-2xl transition-all border-2 flex flex-col items-center justify-center ${
                         isSelected
                           ? 'scale-110 shadow-lg cursor-pointer'
                           : canPlay && !selectedChoice
@@ -889,10 +889,10 @@ export default function Game() {
                         <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          className="absolute -top-2 -right-2 rounded-full w-8 h-8 flex items-center justify-center"
+                          className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 rounded-full w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center"
                           style={{ backgroundColor: '#39FF14' }}
                         >
-                          <FaCheck className="text-sm" style={{ color: '#0A0A0F' }} />
+                          <FaCheck className="text-xs sm:text-sm" style={{ color: '#0A0A0F' }} />
                         </motion.div>
                       )}
                       <motion.div
@@ -906,9 +906,9 @@ export default function Game() {
                           ease: "easeInOut"
                         }}
                       >
-                        <Icon className="text-6xl md:text-7xl" style={{ color: isSelected ? choice.hexColor : choice.hexColor }} />
+                        <Icon className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl" style={{ color: isSelected ? choice.hexColor : choice.hexColor }} />
                       </motion.div>
-                      <div className="text-sm md:text-base mt-3 font-semibold" style={{ color: isSelected ? choice.hexColor : choice.hexColor }}>
+                      <div className="text-xs sm:text-sm md:text-base mt-1.5 sm:mt-3 font-semibold" style={{ color: isSelected ? choice.hexColor : choice.hexColor }}>
                         {choice.name}
                       </div>
                     </motion.button>

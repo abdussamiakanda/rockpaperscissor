@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #0A0A0F;
+    color: #00F5FF;
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-8 py-4 font-bold rounded-lg transform hover:scale-105 transition-all duration-200 uppercase tracking-wider;
+    background-color: #00F5FF;
+    color: #0A0A0F;
+    border: 2px solid #00F5FF;
+  }
+  
+  .btn-secondary {
+    @apply px-8 py-4 font-bold rounded-lg transform hover:scale-105 transition-all duration-200 uppercase tracking-wider;
+    background-color: #FFD700;
+    color: #0A0A0F;
+    border: 2px solid #FFD700;
+  }
+  
+  .card {
+    @apply rounded-lg shadow-2xl p-6;
+    background-color: rgba(10, 10, 15, 0.95);
+    border: 2px solid #00F5FF;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-accent focus:border-transparent transition-all;
+    background-color: rgba(6, 7, 113, 0.5);
+    border: 1px solid rgba(255, 224, 143, 0.3);
+    color: #FFE08F;
+  }
+  
+  .input-field::placeholder {
+    color: rgba(255, 224, 143, 0.5);
+  }
+}

@@ -65,17 +65,17 @@ Create an engaging, real-time multiplayer web application that allows users to p
          │ Real-time Listeners
          │ (onValue subscriptions)
          │
-┌────────▼─────────────────────┐
-│   Firebase Realtime DB       │
+┌────────▼──────────────────────┐
+│   Firebase Realtime DB        │
 │  ┌─────────────────────────┐  │
-│  │  games/                │  │
-│  │  - game_id             │  │
-│  │  - player1_id          │  │
-│  │  - player2_id          │  │
-│  │  - player1_choice      │  │
-│  │  - player2_choice      │  │
-│  │  - turn_results[]      │  │
-│  │  - status              │  │
+│  │  games/                 │  │
+│  │  - game_id              │  │
+│  │  - player1_id           │  │
+│  │  - player2_id           │  │
+│  │  - player1_choice       │  │
+│  │  - player2_choice       │  │
+│  │  - turn_results[]       │  │
+│  │  - status               │  │
 │  └─────────────────────────┘  │
 │  ┌─────────────────────────┐  │
 │  │  profiles/              │  │

@@ -54,13 +54,20 @@ export default function Leaderboard() {
         let losses = 0
         let draws = 0
         let totalGames = 0
+        let roundsWon = 0
+        let roundsLost = 0
+        let roundsDrawn = 0
 
-        // Count games where user is a player
+        // Count games and rounds where user is a player
         Object.values(allGames).forEach((game) => {
           if (game.status === 'completed' && 
               (game.player1_id === userId || game.player2_id === userId)) {
             totalGames++
             
+            const isPlayer1 = game.player1_id === userId
+            const isPlayer2 = game.player2_id === userId
+            
+            // Count game results
             if (game.winner_id === userId) {
               wins++
             } else if (game.winner_id && game.winner_id !== userId) {
@@ -68,8 +75,37 @@ export default function Leaderboard() {
             } else {
               draws++
             }
+            
+            // Count round results from turn_results
+            if (game.turn_results && Array.isArray(game.turn_results)) {
+              game.turn_results.forEach((round) => {
+                const roundResult = typeof round === 'string' ? round : round.result
+                
+                if (roundResult === 'player1' && isPlayer1) {
+                  roundsWon++
+                } else if (roundResult === 'player1' && isPlayer2) {
+                  roundsLost++
+                } else if (roundResult === 'player2' && isPlayer2) {
+                  roundsWon++
+                } else if (roundResult === 'player2' && isPlayer1) {
+                  roundsLost++
+                } else if (roundResult === 'draw') {
+                  roundsDrawn++
+                }
+              })
+            }
           }
         })
+
+        // Calculate score based on rounds (primary metric) with small game-level adjustments
+        // Formula:
+        // - Rounds Won: 10 points each (primary scoring)
+        // - Rounds Lost: -5 points each (penalty)
+        // - Rounds Drawn: 2 points each (neutral contribution)
+        // - Game Wins: +5 bonus per game (small bonus for winning overall)
+        // - Game Losses: -3 penalty per game (small penalty for losing overall)
+        // This focuses primarily on round performance, with minimal game-level adjustments
+        const score = (roundsWon * 10) - (roundsLost * 5) + (roundsDrawn * 2) + (wins * 5) - (losses * 3)
 
         return {
           id: userId,
@@ -77,18 +113,21 @@ export default function Leaderboard() {
           wins,
           losses,
           draws,
-          total_games: totalGames
+          total_games: totalGames,
+          rounds_won: roundsWon,
+          rounds_lost: roundsLost,
+          rounds_drawn: roundsDrawn,
+          score
         }
       })
 
-      // Sort by wins (descending), then by win rate, then by total games
+      // Sort by score (descending), then by wins, then by rounds won
       const sorted = profilesWithStats
         .filter(player => player.total_games > 0) // Only show players who have played
         .sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score
           if (b.wins !== a.wins) return b.wins - a.wins
-          const aWinRate = a.total_games > 0 ? a.wins / a.total_games : 0
-          const bWinRate = b.total_games > 0 ? b.wins / b.total_games : 0
-          if (bWinRate !== aWinRate) return bWinRate - aWinRate
+          if (b.rounds_won !== a.rounds_won) return b.rounds_won - a.rounds_won
           return b.total_games - a.total_games
         })
         .slice(0, 100)
@@ -123,7 +162,9 @@ export default function Leaderboard() {
           <FaTrophy style={{ color: '#FFD700' }} className="text-3xl sm:text-4xl" />
           <span>Leaderboard</span>
         </h1>
-        <p className="text-sm sm:text-base" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>Top players by wins</p>
+        <p className="text-sm sm:text-base" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>
+          Top players ranked by score (considers wins, losses, draws, and round performance)
+        </p>
       </motion.div>
 
       <motion.div
@@ -137,10 +178,6 @@ export default function Leaderboard() {
         ) : (
           <div className="space-y-3 sm:space-y-4">
             {leaderboard.map((player, index) => {
-              const winRate = player.total_games > 0
-                ? Math.round((player.wins / player.total_games) * 100)
-                : 0
-
               return (
                 <Link
                   key={player.id}
@@ -214,8 +251,8 @@ export default function Leaderboard() {
                         <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(255, 215, 0, 0.8)' }}>Draws</div>
                       </div>
                       <div className="text-center border-l-2 pl-4 sm:pl-6" style={{ borderColor: 'rgba(255, 0, 255, 0.3)' }}>
-                        <div className="text-lg sm:text-xl font-black" style={{ color: '#FF00FF' }}>{winRate}%</div>
-                        <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(255, 0, 255, 0.8)' }}>Win Rate</div>
+                        <div className="text-lg sm:text-xl font-black" style={{ color: '#FF00FF' }}>{player.score}</div>
+                        <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(255, 0, 255, 0.8)' }}>Score</div>
                       </div>
                     </div>
                   </motion.div>

@@ -8,6 +8,7 @@ import Auth from './pages/Auth'
 import Game from './pages/Game'
 import Profile from './pages/Profile'
 import Leaderboard from './pages/Leaderboard'
+import BuyMeCoffee from './pages/BuyMeCoffee'
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()
@@ -24,6 +25,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/auth" element={<Auth />} />
+      <Route path="/buy-me-coffee" element={<BuyMeCoffee />} />
       <Route
         path="/dashboard"
         element={

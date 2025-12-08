@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { FaUser, FaSignOutAlt, FaTrophy, FaBars, FaTimes, FaThLarge } from 'react-icons/fa'
+import { FaUser, FaSignOutAlt, FaTrophy, FaBars, FaTimes, FaThLarge, FaCoffee } from 'react-icons/fa'
 import { GiStoneBlock } from 'react-icons/gi'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -142,6 +142,27 @@ export default function Layout({ children }) {
                     <FaTrophy style={{ color: '#FF00FF' }} className="text-sm" />
                     <span>Leaderboard</span>
                   </Link>
+                  <Link
+                    to="/buy-me-coffee"
+                    className="flex items-center space-x-1.5 text-sm font-semibold transition-colors px-2 py-1"
+                    style={{ 
+                      color: isActive('/buy-me-coffee') ? 'rgb(242, 174, 187)' : 'rgba(242, 174, 187, 0.8)',
+                      borderBottom: isActive('/buy-me-coffee') ? '2px solid #FF00FF' : 'none'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isActive('/buy-me-coffee')) {
+                        e.currentTarget.style.color = 'rgb(242, 174, 187)'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive('/buy-me-coffee')) {
+                        e.currentTarget.style.color = 'rgba(242, 174, 187, 0.8)'
+                      }
+                    }}
+                  >
+                    <FaCoffee style={{ color: '#FFD700' }} className="text-sm" />
+                    <span>Support</span>
+                  </Link>
                   <button
                     type="button"
                     onClick={handleSignOut}
@@ -155,29 +176,52 @@ export default function Layout({ children }) {
                   </button>
                 </>
               ) : (
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
+                <>
                   <Link
-                    to="/auth"
-                    className="flex items-center justify-center space-x-2 py-2.5 px-4 rounded-lg font-semibold uppercase tracking-wider text-sm transition-all"
-                    style={{
-                      backgroundColor: 'rgba(0, 245, 255, 0.15)',
-                      color: '#00F5FF',
-                      border: '2px solid #00F5FF',
+                    to="/buy-me-coffee"
+                    className="flex items-center space-x-1.5 text-sm font-semibold transition-colors px-2 py-1"
+                    style={{ 
+                      color: isActive('/buy-me-coffee') ? 'rgb(242, 174, 187)' : 'rgba(242, 174, 187, 0.8)',
+                      borderBottom: isActive('/buy-me-coffee') ? '2px solid #FF00FF' : 'none'
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'rgba(0, 245, 255, 0.25)'
+                      if (!isActive('/buy-me-coffee')) {
+                        e.currentTarget.style.color = 'rgb(242, 174, 187)'
+                      }
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'rgba(0, 245, 255, 0.15)'
+                      if (!isActive('/buy-me-coffee')) {
+                        e.currentTarget.style.color = 'rgba(242, 174, 187, 0.8)'
+                      }
                     }}
                   >
-                    <FaUser style={{ color: '#00F5FF' }} className="text-sm" />
-                    <span>Login</span>
+                    <FaCoffee style={{ color: '#FFD700' }} className="text-sm" />
+                    <span>Support</span>
                   </Link>
-                </motion.div>
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Link
+                      to="/auth"
+                      className="flex items-center justify-center space-x-2 py-2.5 px-4 rounded-lg font-semibold uppercase tracking-wider text-sm transition-all"
+                      style={{
+                        backgroundColor: 'rgba(0, 245, 255, 0.15)',
+                        color: '#00F5FF',
+                        border: '2px solid #00F5FF',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(0, 245, 255, 0.25)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(0, 245, 255, 0.15)'
+                      }}
+                    >
+                      <FaUser style={{ color: '#00F5FF' }} className="text-sm" />
+                      <span>Login</span>
+                    </Link>
+                  </motion.div>
+                </>
               )}
             </div>
 
@@ -322,6 +366,31 @@ export default function Layout({ children }) {
                         <FaTrophy style={{ color: '#FF00FF' }} />
                         <span className="font-semibold">Leaderboard</span>
                       </Link>
+                      <Link
+                        to="/buy-me-coffee"
+                        onClick={closeMenu}
+                        className="flex items-center space-x-3 px-6 py-4 transition-all"
+                        style={{ 
+                          color: isActive('/buy-me-coffee') ? 'rgb(242, 174, 187)' : 'rgba(242, 174, 187, 0.8)',
+                          backgroundColor: isActive('/buy-me-coffee') ? 'rgba(242, 174, 187, 0.15)' : 'transparent',
+                          borderLeft: isActive('/buy-me-coffee') ? '3px solid #FF00FF' : 'none'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isActive('/buy-me-coffee')) {
+                            e.currentTarget.style.color = 'rgb(242, 174, 187)'
+                            e.currentTarget.style.backgroundColor = 'rgba(242, 174, 187, 0.1)'
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isActive('/buy-me-coffee')) {
+                            e.currentTarget.style.color = 'rgba(242, 174, 187, 0.8)'
+                            e.currentTarget.style.backgroundColor = 'transparent'
+                          }
+                        }}
+                      >
+                        <FaCoffee style={{ color: '#FFD700' }} />
+                        <span className="font-semibold">Support</span>
+                      </Link>
                       <button
                         type="button"
                         onClick={handleSignOut}
@@ -343,32 +412,59 @@ export default function Layout({ children }) {
                       </button>
                     </>
                   ) : (
-                    <motion.div
-                      className="px-6 mt-4 mb-4"
-                      whileTap={{ scale: 0.95 }}
-                    >
+                    <>
                       <Link
-                        to="/auth"
+                        to="/buy-me-coffee"
                         onClick={closeMenu}
-                        className="flex items-center justify-center space-x-2 w-full py-2.5 px-4 rounded-lg font-semibold uppercase tracking-wider text-sm transition-all"
-                        style={{
-                          backgroundColor: 'rgba(0, 245, 255, 0.15)',
-                          color: '#00F5FF',
-                          border: '2px solid #00F5FF',
+                        className="flex items-center space-x-3 px-6 py-4 transition-all"
+                        style={{ 
+                          color: isActive('/buy-me-coffee') ? 'rgb(242, 174, 187)' : 'rgba(242, 174, 187, 0.8)',
+                          backgroundColor: isActive('/buy-me-coffee') ? 'rgba(242, 174, 187, 0.15)' : 'transparent',
+                          borderLeft: isActive('/buy-me-coffee') ? '3px solid #FF00FF' : 'none'
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = 'rgba(0, 245, 255, 0.25)'
-                          e.currentTarget.style.transform = 'scale(1.02)'
+                          if (!isActive('/buy-me-coffee')) {
+                            e.currentTarget.style.color = 'rgb(242, 174, 187)'
+                            e.currentTarget.style.backgroundColor = 'rgba(242, 174, 187, 0.1)'
+                          }
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'rgba(0, 245, 255, 0.15)'
-                          e.currentTarget.style.transform = 'scale(1)'
+                          if (!isActive('/buy-me-coffee')) {
+                            e.currentTarget.style.color = 'rgba(242, 174, 187, 0.8)'
+                            e.currentTarget.style.backgroundColor = 'transparent'
+                          }
                         }}
                       >
-                        <FaUser style={{ color: '#00F5FF' }} className="text-sm" />
-                        <span>Login</span>
+                        <FaCoffee style={{ color: '#FFD700' }} />
+                        <span className="font-semibold">Support</span>
                       </Link>
-                    </motion.div>
+                      <motion.div
+                        className="px-6 mt-4 mb-4"
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Link
+                          to="/auth"
+                          onClick={closeMenu}
+                          className="flex items-center justify-center space-x-2 w-full py-2.5 px-4 rounded-lg font-semibold uppercase tracking-wider text-sm transition-all"
+                          style={{
+                            backgroundColor: 'rgba(0, 245, 255, 0.15)',
+                            color: '#00F5FF',
+                            border: '2px solid #00F5FF',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = 'rgba(0, 245, 255, 0.25)'
+                            e.currentTarget.style.transform = 'scale(1.02)'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'rgba(0, 245, 255, 0.15)'
+                            e.currentTarget.style.transform = 'scale(1)'
+                          }}
+                        >
+                          <FaUser style={{ color: '#00F5FF' }} className="text-sm" />
+                          <span>Login</span>
+                        </Link>
+                      </motion.div>
+                    </>
                   )}
                 </div>
               </div>

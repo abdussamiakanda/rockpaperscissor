@@ -112,6 +112,26 @@ export const AuthProvider = ({ children }) => {
 
   const signUp = async (email, password, username) => {
     try {
+      // Check if username already exists
+      const profilesRef = ref(db, 'profiles')
+      const profilesSnapshot = await get(profilesRef)
+      
+      if (profilesSnapshot.exists()) {
+        const profiles = profilesSnapshot.val()
+        const usernameExists = Object.values(profiles).some(
+          profile => profile.username && profile.username.toLowerCase() === username.toLowerCase()
+        )
+        
+        if (usernameExists) {
+          return { 
+            user: null, 
+            error: { 
+              message: 'Username already taken. Please choose a different username.' 
+            } 
+          }
+        }
+      }
+      
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       const user = userCredential.user
       

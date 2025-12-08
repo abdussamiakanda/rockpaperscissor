@@ -97,15 +97,16 @@ export default function Leaderboard() {
           }
         })
 
-        // Calculate score based on rounds (primary metric) with small game-level adjustments
+        // Calculate score based on rounds (primary metric) with game-level adjustments and activity bonus
         // Formula:
         // - Rounds Won: 10 points each (primary scoring)
-        // - Rounds Lost: -5 points each (penalty)
+        // - Rounds Lost: -2 points each (penalty)
         // - Rounds Drawn: 2 points each (neutral contribution)
-        // - Game Wins: +5 bonus per game (small bonus for winning overall)
-        // - Game Losses: -3 penalty per game (small penalty for losing overall)
-        // This focuses primarily on round performance, with minimal game-level adjustments
-        const score = (roundsWon * 10) - (roundsLost * 5) + (roundsDrawn * 2) + (wins * 5) - (losses * 3)
+        // - Game Wins: +2 bonus per game (small bonus for winning overall)
+        // - Game Losses: -2 penalty per game (small penalty for losing overall)
+        // - Games Played: +2 point per game (activity/participation bonus)
+        // This focuses primarily on round performance, with minimal game-level adjustments and activity reward
+        const score = (roundsWon * 10) - (roundsLost * 2) + (roundsDrawn * 2) + (wins * 2) - (losses * 2) + (totalGames * 2)
 
         return {
           id: userId,

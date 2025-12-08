@@ -11,7 +11,9 @@ import {
   set, 
   update,
   onValue,
-  off
+  off,
+  onDisconnect,
+  serverTimestamp
 } from 'firebase/database'
 import { auth, db, isFirebaseConfigured } from '../lib/firebase'
 
@@ -75,23 +77,11 @@ export const AuthProvider = ({ children }) => {
           }
         }
       } else {
-        // Profile doesn't exist, create it
-        const defaultUsername = user?.email?.split('@')[0] || 'Player'
-        
-        const newProfile = {
-          username: defaultUsername,
-          photo_url: user?.photoURL || null,
-          wins: 0,
-          losses: 0,
-          draws: 0,
-          total_games: 0,
-          current_game_id: null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }
-        
-        await set(profileRef, newProfile)
-        setProfile({ id: userId, ...newProfile })
+        // Profile doesn't exist - this shouldn't happen after signup
+        // But if it does, don't overwrite with default username
+        // Just return null and let the signup process handle it
+        console.warn('Profile not found for user:', userId)
+        return null
       }
     } catch (error) {
       console.error('Error fetching profile:', error)
@@ -112,6 +102,19 @@ export const AuthProvider = ({ children }) => {
 
   const signUp = async (email, password, username) => {
     try {
+      // Validate username is not empty
+      if (!username || username.trim() === '') {
+        return { 
+          user: null, 
+          error: { 
+            message: 'Username is required.' 
+          } 
+        }
+      }
+
+      // Trim and normalize username
+      const normalizedUsername = username.trim().toLowerCase()
+      
       // Check if username already exists
       const profilesRef = ref(db, 'profiles')
       const profilesSnapshot = await get(profilesRef)
@@ -119,7 +122,7 @@ export const AuthProvider = ({ children }) => {
       if (profilesSnapshot.exists()) {
         const profiles = profilesSnapshot.val()
         const usernameExists = Object.values(profiles).some(
-          profile => profile.username && profile.username.toLowerCase() === username.toLowerCase()
+          profile => profile.username && profile.username.toLowerCase() === normalizedUsername
         )
         
         if (usernameExists) {
@@ -135,19 +138,29 @@ export const AuthProvider = ({ children }) => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       const user = userCredential.user
       
-      // Create profile in Realtime Database
+      // Create profile in Realtime Database with the normalized username
       const profileRef = ref(db, `profiles/${user.uid}`)
-      await set(profileRef, {
-        username: username,
+      const profileData = {
+        username: normalizedUsername,
         photo_url: user.photoURL || null,
         wins: 0,
         losses: 0,
         draws: 0,
         total_games: 0,
         current_game_id: null,
+        is_online: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      })
+      }
+      
+      await set(profileRef, profileData)
+      
+      // Set up disconnect handler for online status
+      const onlineRef = ref(db, `profiles/${user.uid}/is_online`)
+      onDisconnect(onlineRef).set(false)
+      
+      // Set profile in state immediately
+      setProfile({ id: user.uid, ...profileData })
       
       return { user, error: null }
     } catch (error) {
@@ -168,6 +181,11 @@ export const AuthProvider = ({ children }) => {
 
   const signOut = async () => {
     try {
+      // Set offline status before signing out
+      if (user) {
+        const profileRef = ref(db, `profiles/${user.uid}`)
+        await update(profileRef, { is_online: false })
+      }
       await firebaseSignOut(auth)
       setUser(null)
       setProfile(null)
@@ -197,11 +215,18 @@ export const AuthProvider = ({ children }) => {
       resolveLoading()
     }, 2000)
 
+    let onlineRef = null
+    let disconnectHandler = null
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       clearTimeout(timeoutId)
       
       if (firebaseUser) {
         setUser(firebaseUser)
+        
+        // Wait a bit to ensure profile is created after signup
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
         await fetchProfile(firebaseUser.uid)
         
         // Update photo URL if it exists in Firebase Auth
@@ -216,6 +241,19 @@ export const AuthProvider = ({ children }) => {
           }
         }
         
+        // Set online status (only if profile exists)
+        const profileCheckRef = ref(db, `profiles/${firebaseUser.uid}`)
+        const profileCheckSnapshot = await get(profileCheckRef)
+        if (profileCheckSnapshot.exists()) {
+          const profileUpdateRef = ref(db, `profiles/${firebaseUser.uid}`)
+          await update(profileUpdateRef, { is_online: true })
+          
+          // Set up disconnect handler to set offline when user disconnects
+          onlineRef = ref(db, `profiles/${firebaseUser.uid}/is_online`)
+          disconnectHandler = onDisconnect(onlineRef)
+          disconnectHandler.set(false)
+        }
+        
         // Subscribe to profile updates
         const profileRef = ref(db, `profiles/${firebaseUser.uid}`)
         profileUnsubscribe = onValue(profileRef, (snapshot) => {
@@ -224,6 +262,23 @@ export const AuthProvider = ({ children }) => {
           }
         })
       } else {
+        // User signed out - set offline if we have a reference
+        if (onlineRef && user) {
+          try {
+            const profileRef = ref(db, `profiles/${user.uid}`)
+            await update(profileRef, { is_online: false })
+          } catch (error) {
+            console.error('Error setting offline status:', error)
+          }
+        }
+        // Cancel disconnect handler if it exists
+        if (disconnectHandler) {
+          try {
+            disconnectHandler.cancel()
+          } catch (error) {
+            console.error('Error canceling disconnect handler:', error)
+          }
+        }
         setUser(null)
         setProfile(null)
       }
@@ -235,6 +290,14 @@ export const AuthProvider = ({ children }) => {
       unsubscribe()
       if (profileUnsubscribe) {
         profileUnsubscribe()
+      }
+      // Cancel disconnect handler if it exists
+      if (disconnectHandler) {
+        try {
+          disconnectHandler.cancel()
+        } catch (error) {
+          console.error('Error canceling disconnect handler:', error)
+        }
       }
     }
   }, [])

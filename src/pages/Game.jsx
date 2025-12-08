@@ -28,6 +28,7 @@ export default function Game() {
   const [winner, setWinner] = useState(null)
   const [resolvingTurn, setResolvingTurn] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [challengedPlayer, setChallengedPlayer] = useState(null)
   const [gameAbandoned, setGameAbandoned] = useState(false)
   const [userAbandoned, setUserAbandoned] = useState(false) // Track if current user abandoned
   const choiceTimeoutRef = useRef(null)
@@ -179,6 +180,18 @@ export default function Game() {
       }
       
       setGame(gameData)
+
+      // Fetch challenged player profile if this is a challenge
+      if (gameData.challenged_user_id && gameData.status === 'waiting') {
+        const challengedRef = ref(db, `profiles/${gameData.challenged_user_id}`)
+        const challengedSnapshot = await get(challengedRef)
+        if (challengedSnapshot.exists()) {
+          const challengedData = challengedSnapshot.val()
+          setChallengedPlayer(challengedData.username || 'Player')
+        }
+      } else {
+        setChallengedPlayer(null)
+      }
 
       // Fetch player profiles
       if (gameData.player1_id) {
@@ -552,7 +565,9 @@ export default function Game() {
             <FaSpinner className="animate-spin text-4xl sm:text-5xl mx-auto mb-4" style={{ color: '#FF00FF' }} />
             <h2 className="text-2xl sm:text-3xl font-black mb-2 uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>Waiting for opponent...</h2>
             <p className="text-sm sm:text-base" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>
-              Looking for someone to play with
+              {challengedPlayer 
+                ? `Waiting for ${challengedPlayer} to join...`
+                : 'Looking for someone to play with'}
             </p>
           </motion.div>
           <motion.button

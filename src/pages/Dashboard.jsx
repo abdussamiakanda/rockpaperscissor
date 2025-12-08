@@ -28,6 +28,7 @@ export default function Dashboard() {
     draws: 0,
     total_games: 0
   })
+  const [onlineCount, setOnlineCount] = useState(0)
 
   // Calculate stats from games
   useEffect(() => {
@@ -75,6 +76,32 @@ export default function Dashboard() {
       off(gamesRef, 'value', unsubscribe)
     }
   }, [user])
+
+  // Track online players count
+  useEffect(() => {
+    const profilesRef = ref(db, 'profiles')
+    const unsubscribe = onValue(profilesRef, (snapshot) => {
+      if (!snapshot.exists()) {
+        setOnlineCount(0)
+        return
+      }
+
+      const allProfiles = snapshot.val()
+      let count = 0
+      Object.values(allProfiles).forEach((profile) => {
+        if (profile.is_online === true) {
+          count++
+        }
+      })
+      setOnlineCount(count)
+    }, (error) => {
+      console.error('[Dashboard] Online count subscription error:', error)
+    })
+
+    return () => {
+      off(profilesRef, 'value', unsubscribe)
+    }
+  }, [])
 
   useEffect(() => {
     // Check for ongoing game on mount
@@ -146,12 +173,19 @@ export default function Dashboard() {
 
       const waitingGamesSnapshot = await get(waitingGamesQuery)
       
-      // Filter out games where we are player1 and where player2_id exists
+      // Filter out games where we are player1, where player2_id exists, and challenged games (unless we're the challenged user)
       let availableGame = null
       if (waitingGamesSnapshot.exists()) {
         const games = waitingGamesSnapshot.val()
         availableGame = Object.entries(games).find(([gameId, gameData]) => {
-          return gameData.player1_id !== user.uid && !gameData.player2_id
+          // Skip if we're player1
+          if (gameData.player1_id === user.uid) return false
+          // Skip if player2 already exists
+          if (gameData.player2_id) return false
+          // Skip if it's a challenged game and we're not the challenged user
+          if (gameData.challenged_user_id && gameData.challenged_user_id !== user.uid) return false
+          // This game is available for us
+          return true
         })
       }
 
@@ -287,6 +321,9 @@ export default function Dashboard() {
               </>
             )}
           </motion.button>
+          <p className="mt-3 text-center text-xs sm:text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(0, 245, 255, 0.8)' }}>
+            {onlineCount} {onlineCount === 1 ? 'player' : 'players'} online
+          </p>
         </motion.div>
 
         <motion.div

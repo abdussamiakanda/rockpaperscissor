@@ -1,0 +1,24 @@
+{
+  "rules": {
+    "profiles": {
+      ".read": true,
+      "$userId": {
+        ".write": "auth != null && auth.uid == $userId"
+      }
+    },
+    "games": {
+      ".read": true,
+      ".indexOn": ["status"],
+      "$gameId": {
+        ".write": "auth != null && (
+          !data.exists() || 
+          data.child('player1_id').val() == auth.uid || 
+          data.child('player2_id').val() == auth.uid ||
+          (data.child('player2_id').val() == null && data.child('player1_id').val() != auth.uid) ||
+          data.child('challenged_user_id').val() == auth.uid
+        )"
+      }
+    }
+  }
+}
+

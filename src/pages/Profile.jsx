@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { ref, get, onValue, off } from 'firebase/database'
+import { ref, get, onValue, off, update, push, remove } from 'firebase/database'
 import { db } from '../lib/firebase'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FaTrophy, FaChartLine, FaUser, FaHandRock, FaHandPaper, FaHandScissors, FaTimes, FaHandshake, FaThumbsUp, FaThumbsDown } from 'react-icons/fa'
+import { FaTrophy, FaChartLine, FaUser, FaHandRock, FaHandPaper, FaHandScissors, FaTimes, FaHandshake, FaThumbsUp, FaThumbsDown, FaEdit, FaFire, FaStar, FaCrown, FaRobot, FaGhost, FaUserAstronaut, FaPlay, FaSpinner } from 'react-icons/fa'
 import LoadingSpinner from '../components/LoadingSpinner'
+import Avatar, { AVATAR_OPTIONS } from '../components/Avatar'
 
 export default function Profile() {
   const { username: urlUsername } = useParams()
@@ -14,24 +15,246 @@ export default function Profile() {
   const [targetProfile, setTargetProfile] = useState(null)
   const [targetUserId, setTargetUserId] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [isOnline, setIsOnline] = useState(false)
   const [recentGames, setRecentGames] = useState([])
   const [stats, setStats] = useState({
     wins: 0,
     losses: 0,
     draws: 0,
-    total_games: 0
+    total_games: 0,
+    win_streak: 0
   })
   const [selectedGame, setSelectedGame] = useState(null)
   const [currentRoundIndex, setCurrentRoundIndex] = useState(0)
   const [showChoices, setShowChoices] = useState(false)
   const [showResult, setShowResult] = useState(false)
   const [winnerUsername, setWinnerUsername] = useState(null)
+  const [showAvatarSelector, setShowAvatarSelector] = useState(false)
+  const [savingAvatar, setSavingAvatar] = useState(false)
+  const [challenging, setChallenging] = useState(false)
+  const challengeTimeoutRef = useRef(null)
+  const [editingBio, setEditingBio] = useState(false)
+  const [bioText, setBioText] = useState('')
+  const [savingBio, setSavingBio] = useState(false)
+  const [showTimeoutModal, setShowTimeoutModal] = useState(false)
+  const [timeoutMessage, setTimeoutMessage] = useState('')
 
   const CHOICES = {
     rock: { icon: FaHandRock, name: 'Rock', hexColor: '#FFD700' },
     paper: { icon: FaHandPaper, name: 'Paper', hexColor: '#FF00FF' },
     scissors: { icon: FaHandScissors, name: 'Scissors', hexColor: '#39FF14' },
   }
+
+
+
+  // Save avatar selection
+  const handleAvatarSelect = async (avatarId) => {
+    if (!user || !targetUserId || targetUserId !== user.uid) return
+    
+    setSavingAvatar(true)
+    try {
+      const profileRef = ref(db, `profiles/${user.uid}`)
+      await update(profileRef, { 
+        avatar: avatarId,
+        updated_at: new Date().toISOString()
+      })
+      setShowAvatarSelector(false)
+    } catch (error) {
+      console.error('Error saving avatar:', error)
+    } finally {
+      setSavingAvatar(false)
+    }
+  }
+
+  // Save bio
+  const handleSaveBio = async () => {
+    if (!user || !targetUserId || targetUserId !== user.uid) return
+    
+    setSavingBio(true)
+    try {
+      const profileRef = ref(db, `profiles/${user.uid}`)
+      await update(profileRef, { 
+        bio: bioText.trim(),
+        updated_at: new Date().toISOString()
+      })
+      setEditingBio(false)
+    } catch (error) {
+      console.error('Error saving bio:', error)
+    } finally {
+      setSavingBio(false)
+    }
+  }
+
+  // Challenge user to a game (like dashboard findMatch but for specific player)
+  const handleChallenge = async () => {
+    if (!user || !targetUserId || targetUserId === user.uid || challenging) return
+
+    // Reset timeout modal state when starting new challenge
+    setShowTimeoutModal(false)
+    setTimeoutMessage('')
+    setChallenging(true)
+    try {
+      // Check if user already has an active game
+      if (profile?.current_game_id) {
+        const currentGameRef = ref(db, `games/${profile.current_game_id}`)
+        const currentGameSnapshot = await get(currentGameRef)
+        if (currentGameSnapshot.exists()) {
+          const currentGame = currentGameSnapshot.val()
+          if (currentGame.status !== 'completed') {
+            // User already has an active game, navigate to it
+            navigate('/game')
+            setChallenging(false)
+            return
+          }
+        }
+      }
+
+      // Check if target user has an active game
+      const targetProfileRef = ref(db, `profiles/${targetUserId}`)
+      const targetProfileSnapshot = await get(targetProfileRef)
+      if (targetProfileSnapshot.exists()) {
+        const targetProfile = targetProfileSnapshot.val()
+        if (targetProfile.current_game_id) {
+          const targetGameRef = ref(db, `games/${targetProfile.current_game_id}`)
+          const targetGameSnapshot = await get(targetGameRef)
+          if (targetGameSnapshot.exists()) {
+            const targetGame = targetGameSnapshot.val()
+            if (targetGame.status !== 'completed') {
+              alert(`${targetProfile.username} is already in a game!`)
+              setChallenging(false)
+              return
+            }
+          }
+        }
+      }
+
+      // Create a waiting game (like dashboard)
+      const newGameRef = push(ref(db, 'games'))
+      const newGame = {
+        player1_id: user.uid,
+        player2_id: null, // Will be set when target player joins
+        status: 'waiting',
+        current_turn: 1,
+        player1_choice: null,
+        player2_choice: null,
+        turn_results: [],
+        winner_id: null,
+        challenged_user_id: targetUserId, // Store who we're challenging
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
+      
+      await update(newGameRef, newGame)
+      const gameId = newGameRef.key
+      
+      // Store game ID in profile
+      const userProfileRef = ref(db, `profiles/${user.uid}`)
+      await update(userProfileRef, { current_game_id: gameId })
+
+      // Timeout after 30 seconds - cancel the game if opponent doesn't join
+      challengeTimeoutRef.current = setTimeout(async () => {
+        setChallenging(false)
+        off(newGameRef, 'value', unsubscribe)
+        // Delete the waiting game
+        await remove(newGameRef)
+        // Clear current_game_id from profile
+        if (user) {
+          try {
+            const profileRef = ref(db, `profiles/${user.uid}`)
+            await update(profileRef, { current_game_id: null })
+          } catch (error) {
+            console.error('Error clearing current_game_id on timeout:', error)
+          }
+        }
+        setTimeoutMessage(`${targetProfile?.username || 'Player'} didn't join in time. Challenge cancelled.`)
+        setShowTimeoutModal(true)
+      }, 30000)
+
+      // Subscribe to game changes - watch for when target player joins or game is deleted (denied)
+      const unsubscribe = onValue(newGameRef, (snapshot) => {
+        if (!snapshot.exists()) {
+          // Game was deleted (denied or cancelled)
+          if (challengeTimeoutRef.current) {
+            clearTimeout(challengeTimeoutRef.current)
+            challengeTimeoutRef.current = null
+          }
+          setChallenging(false)
+          off(newGameRef, 'value', unsubscribe)
+          
+          // Check if it was denied (game deleted before timeout)
+          const now = Date.now()
+          const gameCreated = new Date(newGame.created_at || 0).getTime()
+          const timeSinceCreation = now - gameCreated
+          
+          // If game was deleted within 30 seconds, it was likely denied
+          if (timeSinceCreation < 30000) {
+            // Fetch target player name for the modal
+            const targetProfileRef = ref(db, `profiles/${targetUserId}`)
+            get(targetProfileRef).then((snapshot) => {
+              if (snapshot.exists()) {
+                const profile = snapshot.val()
+                setTimeoutMessage(`${profile.username || 'Player'} denied your challenge.`)
+                setShowTimeoutModal(true)
+              } else {
+                setTimeoutMessage('Challenge was denied.')
+                setShowTimeoutModal(true)
+              }
+            }).catch(() => {
+              setTimeoutMessage('Challenge was denied.')
+              setShowTimeoutModal(true)
+            })
+          }
+          return
+        }
+        
+        const game = snapshot.val()
+        if (game.player2_id && game.status === 'in_progress') {
+          // Clear the timeout since opponent joined
+          if (challengeTimeoutRef.current) {
+            clearTimeout(challengeTimeoutRef.current)
+            challengeTimeoutRef.current = null
+          }
+          setChallenging(false)
+          off(newGameRef, 'value', unsubscribe)
+          navigate('/game')
+        }
+      })
+
+      // Cleanup on unmount
+      return () => {
+        if (challengeTimeoutRef.current) {
+          clearTimeout(challengeTimeoutRef.current)
+          challengeTimeoutRef.current = null
+        }
+        off(newGameRef, 'value', unsubscribe)
+      }
+    } catch (error) {
+      console.error('Error challenging user:', error)
+      if (challengeTimeoutRef.current) {
+        clearTimeout(challengeTimeoutRef.current)
+        challengeTimeoutRef.current = null
+      }
+      alert('Failed to challenge user. Please try again.')
+      setChallenging(false)
+    }
+  }
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (challengeTimeoutRef.current) {
+        clearTimeout(challengeTimeoutRef.current)
+        challengeTimeoutRef.current = null
+      }
+    }
+  }, [])
+
+  // Update bio text when profile changes
+  useEffect(() => {
+    if (targetProfile?.bio !== undefined) {
+      setBioText(targetProfile.bio || '')
+    }
+  }, [targetProfile])
 
   // Find user by username
   useEffect(() => {
@@ -81,6 +304,26 @@ export default function Profile() {
       findUserByUsername()
     }
   }, [urlUsername, user, profile])
+
+  // Subscribe to online status for target user
+  useEffect(() => {
+    if (!targetUserId) {
+      setIsOnline(false)
+      return
+    }
+
+    const onlineRef = ref(db, `profiles/${targetUserId}/is_online`)
+    const unsubscribe = onValue(onlineRef, (snapshot) => {
+      setIsOnline(snapshot.val() === true)
+    }, (error) => {
+      console.error('Error subscribing to online status:', error)
+      setIsOnline(false)
+    })
+
+    return () => {
+      off(onlineRef, 'value', unsubscribe)
+    }
+  }, [targetUserId])
 
   const fetchRecentGames = async (userGames, targetUid) => {
     if (!targetUid || !userGames || userGames.length === 0) {
@@ -134,7 +377,7 @@ export default function Profile() {
   // Calculate stats from games for target user
   useEffect(() => {
     if (!targetUserId) {
-      setStats({ wins: 0, losses: 0, draws: 0, total_games: 0 })
+      setStats({ wins: 0, losses: 0, draws: 0, total_games: 0, win_streak: 0 })
       setRecentGames([])
       return
     }
@@ -142,7 +385,7 @@ export default function Profile() {
     const gamesRef = ref(db, 'games')
     const unsubscribe = onValue(gamesRef, (snapshot) => {
       if (!snapshot.exists()) {
-        setStats({ wins: 0, losses: 0, draws: 0, total_games: 0 })
+        setStats({ wins: 0, losses: 0, draws: 0, total_games: 0, win_streak: 0 })
         fetchRecentGames([], targetUserId)
         return
       }
@@ -152,6 +395,7 @@ export default function Profile() {
       let losses = 0
       let draws = 0
       let totalGames = 0
+      let winStreak = 0
 
       const userGames = Object.entries(allGames)
         .map(([gameId, gameData]) => ({
@@ -180,7 +424,16 @@ export default function Profile() {
         }
       })
 
-      setStats({ wins, losses, draws, total_games: totalGames })
+      // Calculate win streak (consecutive wins from most recent game)
+      for (const game of userGames) {
+        if (game.winner_id === targetUserId) {
+          winStreak++
+        } else {
+          break // Stop counting when we hit a non-win
+        }
+      }
+
+      setStats({ wins, losses, draws, total_games: totalGames, win_streak: winStreak })
       fetchRecentGames(userGames, targetUserId)
     }, (error) => {
       console.error('[Profile] Games subscription error:', error)
@@ -229,30 +482,185 @@ export default function Profile() {
         animate={{ opacity: 1, y: 0 }}
         className="card mb-6 sm:mb-8"
       >
-        <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6 mb-6 sm:mb-8">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center text-4xl sm:text-5xl border-2 overflow-hidden" style={{ 
-            backgroundColor: 'rgba(255, 0, 255, 0.15)',
-            borderColor: '#FF00FF'
-          }}>
-            {targetProfile.photo_url ? (
-              <img 
-                src={targetProfile.photo_url} 
-                alt={targetProfile.username}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <FaUser style={{ color: '#FF00FF' }} />
-            )}
+        <div className="flex flex-row flex-wrap items-start gap-6 mb-6 sm:mb-8">
+          <div className="flex flex-row items-start space-x-6 flex-1 min-w-0">
+            <div className="relative flex-shrink-0">
+              <Avatar profile={targetProfile} size="xl" className="w-20 h-20 sm:w-24 sm:h-24" isOnline={isOnline && targetUserId !== user?.uid} />
+              {isOwnProfile && (
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowAvatarSelector(true)}
+                  className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full flex items-center justify-center border-2"
+                  style={{
+                    backgroundColor: '#1a1a2e',
+                    borderColor: '#FF00FF',
+                    color: '#FF00FF'
+                  }}
+                  title="Change Avatar"
+                >
+                  <FaEdit className="text-sm" />
+                </motion.button>
+              )}
+            </div>
+            <div className="text-left flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>
+                  {targetProfile.username}
+                </h1>
+                {targetUserId && targetUserId !== user?.uid && (
+                  <div className="flex items-center space-x-1">
+                    <div 
+                      className={`w-2 h-2 rounded-full ${isOnline ? 'animate-pulse' : ''}`}
+                      style={{
+                        backgroundColor: isOnline ? '#39FF14' : '#BF1A1A'
+                      }}
+                      title={isOnline ? 'Online' : 'Offline'}
+                    />
+                    <span className="text-xs font-semibold uppercase tracking-wider" style={{ 
+                      color: isOnline ? 'rgba(57, 255, 20, 0.8)' : 'rgba(191, 26, 26, 0.8)' 
+                    }}>
+                      {isOnline ? 'Online' : 'Offline'}
+                    </span>
+                  </div>
+                )}
+              </div>
+              {isOwnProfile && user?.email && (
+                <p className="text-sm sm:text-base mb-2" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>{user.email}</p>
+              )}
+              {editingBio ? (
+                <div className="mt-2">
+                  <textarea
+                    value={bioText}
+                    onChange={(e) => setBioText(e.target.value)}
+                    placeholder="Write a short bio..."
+                    maxLength={150}
+                    className="w-full px-3 py-2 rounded-lg border-2 bg-transparent resize-none text-sm sm:text-base"
+                    style={{
+                      borderColor: '#FF00FF',
+                      color: 'rgb(242, 174, 187)',
+                      minHeight: '60px'
+                    }}
+                    rows={3}
+                  />
+                  <div className="flex items-center space-x-2 mt-2">
+                    <motion.button
+                      onClick={handleSaveBio}
+                      disabled={savingBio}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="px-3 py-1.5 rounded-lg font-bold text-xs uppercase tracking-wider"
+                      style={{
+                        backgroundColor: 'rgba(57, 255, 20, 0.2)',
+                        border: '2px solid #39FF14',
+                        color: '#39FF14',
+                        cursor: savingBio ? 'not-allowed' : 'pointer',
+                        opacity: savingBio ? 0.7 : 1
+                      }}
+                    >
+                      {savingBio ? 'Saving...' : 'Save'}
+                    </motion.button>
+                    <motion.button
+                      onClick={() => {
+                        setEditingBio(false)
+                        setBioText(targetProfile?.bio || '')
+                      }}
+                      disabled={savingBio}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="px-3 py-1.5 rounded-lg font-bold text-xs uppercase tracking-wider"
+                      style={{
+                        backgroundColor: 'rgba(191, 26, 26, 0.2)',
+                        border: '2px solid #BF1A1A',
+                        color: '#BF1A1A',
+                        cursor: savingBio ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      Cancel
+                    </motion.button>
+                  </div>
+                  <p className="text-xs mt-1" style={{ color: 'rgba(242, 174, 187, 0.5)' }}>
+                    {bioText.length}/150 characters
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-2">
+                  {targetProfile.bio ? (
+                    <p className="text-sm sm:text-base mb-2" style={{ color: 'rgba(242, 174, 187, 0.8)' }}>
+                      {targetProfile.bio}
+                    </p>
+                  ) : (
+                    <p className="text-sm sm:text-base mb-2 italic" style={{ color: 'rgba(242, 174, 187, 0.5)' }}>
+                      {isOwnProfile ? 'No bio yet. Click edit to add one.' : 'No bio available.'}
+                    </p>
+                  )}
+                  {isOwnProfile && (
+                    <motion.button
+                      onClick={() => setEditingBio(true)}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="inline-flex items-center space-x-1 px-2 py-1 rounded text-xs font-semibold uppercase tracking-wider"
+                      style={{
+                        backgroundColor: 'rgba(255, 0, 255, 0.15)',
+                        border: '1px solid rgba(255, 0, 255, 0.5)',
+                        color: '#FF00FF'
+                      }}
+                    >
+                      <FaEdit className="text-xs" />
+                      <span>{targetProfile.bio ? 'Edit Bio' : 'Add Bio'}</span>
+                    </motion.button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-          <div className="text-center sm:text-left flex-1">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black mb-2 uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>
-              {targetProfile.username}
-            </h1>
-            {isOwnProfile && user?.email && (
-              <p className="text-sm sm:text-base" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>{user.email}</p>
-            )}
-          </div>
+          {!isOwnProfile && user && (
+            <div className="w-full sm:w-auto flex justify-end">
+              <motion.button
+                onClick={handleChallenge}
+                disabled={challenging}
+                whileHover={{ scale: 1.05, boxShadow: '0 0 15px rgba(57, 255, 20, 0.4)' }}
+                whileTap={{ scale: 0.95 }}
+                className="flex-shrink-0 inline-flex items-center space-x-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm uppercase tracking-wider transition-all"
+                style={{
+                  backgroundColor: challenging ? 'rgba(57, 255, 20, 0.3)' : 'rgba(57, 255, 20, 0.2)',
+                  border: '2px solid #39FF14',
+                  color: '#39FF14',
+                  cursor: challenging ? 'not-allowed' : 'pointer',
+                  opacity: challenging ? 0.7 : 1,
+                  boxShadow: challenging ? 'none' : '0 2px 10px rgba(57, 255, 20, 0.25)'
+                }}
+              >
+                {challenging ? (
+                  <>
+                    <FaSpinner className="animate-spin text-xs sm:text-sm" />
+                    <span>Challenging...</span>
+                  </>
+                ) : (
+                  <>
+                    <FaPlay className="text-xs sm:text-sm" />
+                    <span>Challenge</span>
+                  </>
+                )}
+              </motion.button>
+            </div>
+          )}
         </div>
+
+        {stats.win_streak > 3 && (
+          <div className="mb-4 sm:mb-6 flex items-center justify-center">
+            <div className="rounded-lg p-4 sm:p-5 text-center border-2" style={{
+              backgroundColor: 'rgba(255, 69, 0, 0.15)',
+              borderColor: '#FF4500'
+            }}>
+              <div className="text-2xl sm:text-3xl font-black mb-1 flex items-center justify-center space-x-2" style={{ color: '#FF4500' }}>
+                <FaFire className="text-xl sm:text-2xl" />
+                <span>{stats.win_streak}</span>
+              </div>
+              <div className="text-xs sm:text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(255, 69, 0, 0.9)' }}>Win Streak</div>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
           <div className="rounded-lg p-4 sm:p-5 text-center border-2" style={{
@@ -360,10 +768,11 @@ export default function Profile() {
                       : '#BF1A1A'
                   }}
                 >
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0">
+                  <div className="flex flex-row justify-between items-center">
                     <div className="flex-1">
-                      <div className="text-base sm:text-lg font-black uppercase tracking-wider mb-1" style={{ color: 'rgb(242, 174, 187)' }}>
-                        vs {game.opponentUsername || 'Unknown'}
+                      <div className="text-base sm:text-lg font-black uppercase tracking-wider mb-1 flex items-center space-x-2">
+                        <span style={{ color: 'rgba(242, 174, 187, 0.6)' }}>vs</span>
+                        <span style={{ color: 'rgb(242, 174, 187)' }}>{game.opponentUsername || 'Unknown'}</span>
                       </div>
                       <div className="text-xs sm:text-sm" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>
                         {new Date(game.created_at).toLocaleDateString('en-US', { 
@@ -375,7 +784,7 @@ export default function Profile() {
                         })}
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="ml-4 flex-shrink-0">
                       {isWinner ? (
                         <span className="text-base sm:text-lg font-black uppercase tracking-wider px-3 py-1 rounded" style={{ 
                           color: '#39FF14',
@@ -497,6 +906,139 @@ export default function Profile() {
                   No rounds played in this game
                 </p>
               )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Avatar Selector Modal */}
+      <AnimatePresence>
+        {showAvatarSelector && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0.9)' }}
+            onClick={() => !savingAvatar && setShowAvatarSelector(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="card max-w-md md:max-w-2xl lg:max-w-3xl w-full"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>
+                  Choose Your Avatar
+                </h2>
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => !savingAvatar && setShowAvatarSelector(false)}
+                  className="p-2 rounded-full"
+                  style={{ color: '#BF1A1A' }}
+                  disabled={savingAvatar}
+                >
+                  <FaTimes className="text-2xl" />
+                </motion.button>
+              </div>
+
+              <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-6 lg:grid-cols-6 gap-4 md:gap-6">
+                {AVATAR_OPTIONS.map((avatar) => {
+                  const isSelected = targetProfile?.avatar === avatar.id
+                  const IconComponent = avatar.icon
+                  return (
+                    <motion.button
+                      key={avatar.id}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleAvatarSelect(avatar.id)}
+                      disabled={savingAvatar}
+                      className={`w-16 h-16 sm:w-20 sm:h-20 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-full flex items-center justify-center border-2 transition-all ${
+                        isSelected ? 'ring-4 ring-offset-2' : ''
+                      }`}
+                      style={{
+                        backgroundColor: isSelected 
+                          ? 'rgba(255, 0, 255, 0.3)' 
+                          : 'rgba(255, 0, 255, 0.15)',
+                        borderColor: isSelected ? '#FF00FF' : 'rgba(255, 0, 255, 0.5)',
+                        ringColor: '#FF00FF',
+                        ringOffsetColor: '#1a1a2e',
+                        opacity: savingAvatar ? 0.5 : 1,
+                        cursor: savingAvatar ? 'not-allowed' : 'pointer'
+                      }}
+                      title={avatar.name}
+                    >
+                      <IconComponent 
+                        style={{ color: avatar.color || '#FF00FF' }} 
+                        className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl"
+                        aria-label={avatar.name}
+                      />
+                    </motion.button>
+                  )
+                })}
+              </div>
+
+              {savingAvatar && (
+                <div className="mt-6 text-center">
+                  <p className="text-sm" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>
+                    Saving...
+                  </p>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Timeout Modal */}
+      <AnimatePresence>
+        {showTimeoutModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0.9)' }}
+            onClick={() => {
+              setShowTimeoutModal(false)
+              setTimeoutMessage('')
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="card max-w-md w-full"
+            >
+              <div className="text-center mb-6">
+                <h2 className="text-2xl sm:text-3xl font-black mb-4 uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>
+                  {timeoutMessage.includes('denied') ? 'Challenge Denied' : 'Challenge Timeout'}
+                </h2>
+                <p className="text-sm sm:text-base mb-6" style={{ color: 'rgba(242, 174, 187, 0.8)' }}>
+                  {timeoutMessage}
+                </p>
+                <motion.button
+                  onClick={() => {
+                    setShowTimeoutModal(false)
+                    setTimeoutMessage('')
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-full flex items-center justify-center space-x-2 py-3 rounded-lg font-bold text-sm sm:text-base uppercase tracking-wider transition-all"
+                  style={{
+                    backgroundColor: 'rgba(255, 0, 255, 0.2)',
+                    border: '2px solid #FF00FF',
+                    color: '#FF00FF',
+                    boxShadow: '0 2px 10px rgba(255, 0, 255, 0.25)'
+                  }}
+                >
+                  <span>OK</span>
+                </motion.button>
+              </div>
             </motion.div>
           </motion.div>
         )}

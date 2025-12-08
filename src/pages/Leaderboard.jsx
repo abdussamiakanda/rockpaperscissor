@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom'
 import { ref, get, onValue, off } from 'firebase/database'
 import { db } from '../lib/firebase'
 import { motion } from 'framer-motion'
-import { FaTrophy, FaMedal, FaAward, FaUser } from 'react-icons/fa'
+import { FaTrophy, FaMedal, FaAward, FaUser, FaFire } from 'react-icons/fa'
+import Avatar from '../components/Avatar'
 import LoadingSpinner from '../components/LoadingSpinner'
 
 export default function Leaderboard() {
   const [leaderboard, setLeaderboard] = useState([])
   const [loading, setLoading] = useState(true)
+  const [onlineStatus, setOnlineStatus] = useState({})
 
   useEffect(() => {
     fetchLeaderboard()
@@ -21,8 +23,18 @@ export default function Leaderboard() {
       fetchLeaderboard()
     })
     
-    const unsubscribeProfiles = onValue(profilesRef, () => {
+    const unsubscribeProfiles = onValue(profilesRef, (snapshot) => {
       fetchLeaderboard()
+      
+      // Update online status
+      if (snapshot.exists()) {
+        const allProfiles = snapshot.val()
+        const onlineMap = {}
+        Object.entries(allProfiles).forEach(([userId, profileData]) => {
+          onlineMap[userId] = profileData.is_online === true
+        })
+        setOnlineStatus(onlineMap)
+      }
     })
 
     return () => {
@@ -57,56 +69,78 @@ export default function Leaderboard() {
         let roundsWon = 0
         let roundsLost = 0
         let roundsDrawn = 0
+        let winStreak = 0
+
+        // Get all games for this user, sorted by date (most recent first)
+        const userGames = Object.entries(allGames)
+          .map(([gameId, gameData]) => ({
+            id: gameId,
+            ...gameData
+          }))
+          .filter(game => 
+            game.status === 'completed' && 
+            (game.player1_id === userId || game.player2_id === userId)
+          )
+          .sort((a, b) => {
+            const dateA = new Date(a.created_at || 0).getTime()
+            const dateB = new Date(b.created_at || 0).getTime()
+            return dateB - dateA // Most recent first
+          })
 
         // Count games and rounds where user is a player
-        Object.values(allGames).forEach((game) => {
-          if (game.status === 'completed' && 
-              (game.player1_id === userId || game.player2_id === userId)) {
-            totalGames++
-            
-            const isPlayer1 = game.player1_id === userId
-            const isPlayer2 = game.player2_id === userId
-            
-            // Count game results
-            if (game.winner_id === userId) {
-              wins++
-            } else if (game.winner_id && game.winner_id !== userId) {
-              losses++
-            } else {
-              draws++
-            }
-            
-            // Count round results from turn_results
-            if (game.turn_results && Array.isArray(game.turn_results)) {
-              game.turn_results.forEach((round) => {
-                const roundResult = typeof round === 'string' ? round : round.result
-                
-                if (roundResult === 'player1' && isPlayer1) {
-                  roundsWon++
-                } else if (roundResult === 'player1' && isPlayer2) {
-                  roundsLost++
-                } else if (roundResult === 'player2' && isPlayer2) {
-                  roundsWon++
-                } else if (roundResult === 'player2' && isPlayer1) {
-                  roundsLost++
-                } else if (roundResult === 'draw') {
-                  roundsDrawn++
-                }
-              })
-            }
+        userGames.forEach((game) => {
+          totalGames++
+          
+          const isPlayer1 = game.player1_id === userId
+          const isPlayer2 = game.player2_id === userId
+          
+          // Count game results
+          if (game.winner_id === userId) {
+            wins++
+          } else if (game.winner_id && game.winner_id !== userId) {
+            losses++
+          } else {
+            draws++
+          }
+          
+          // Count round results from turn_results
+          if (game.turn_results && Array.isArray(game.turn_results)) {
+            game.turn_results.forEach((round) => {
+              const roundResult = typeof round === 'string' ? round : round.result
+              
+              if (roundResult === 'player1' && isPlayer1) {
+                roundsWon++
+              } else if (roundResult === 'player1' && isPlayer2) {
+                roundsLost++
+              } else if (roundResult === 'player2' && isPlayer2) {
+                roundsWon++
+              } else if (roundResult === 'player2' && isPlayer1) {
+                roundsLost++
+              } else if (roundResult === 'draw') {
+                roundsDrawn++
+              }
+            })
           }
         })
 
-        // Calculate score based on rounds (primary metric) with game-level adjustments and activity bonus
+        // Calculate win streak (consecutive wins from most recent game)
+        for (const game of userGames) {
+          if (game.winner_id === userId) {
+            winStreak++
+          } else {
+            break // Stop counting when we hit a non-win
+          }
+        }
+
+        // Calculate score based on performance, not activity
         // Formula:
         // - Rounds Won: 10 points each (primary scoring)
         // - Rounds Lost: -2 points each (penalty)
         // - Rounds Drawn: 2 points each (neutral contribution)
-        // - Game Wins: +2 bonus per game (small bonus for winning overall)
-        // - Game Losses: -2 penalty per game (small penalty for losing overall)
-        // - Games Played: +2 point per game (activity/participation bonus)
-        // This focuses primarily on round performance, with minimal game-level adjustments and activity reward
-        const score = (roundsWon * 10) - (roundsLost * 2) + (roundsDrawn * 2) + (wins * 2) - (losses * 2) + (totalGames * 2)
+        // - Game Wins: +5 bonus per game (reward for winning overall)
+        // - Game Losses: -3 penalty per game (penalty for losing overall)
+        // This focuses on performance quality, not quantity of games played
+        const score = (roundsWon * 10) - (roundsLost * 2) + (roundsDrawn * 2) + (wins * 5) - (losses * 3)
 
         return {
           id: userId,
@@ -118,14 +152,20 @@ export default function Leaderboard() {
           rounds_won: roundsWon,
           rounds_lost: roundsLost,
           rounds_drawn: roundsDrawn,
+          win_streak: winStreak,
           score
         }
       })
 
       // Sort by score (descending), then by wins, then by rounds won
+      // Show all users, but prioritize those who have played games
       const sorted = profilesWithStats
-        .filter(player => player.total_games > 0) // Only show players who have played
         .sort((a, b) => {
+          // First, prioritize players who have played games
+          if (a.total_games === 0 && b.total_games > 0) return 1
+          if (a.total_games > 0 && b.total_games === 0) return -1
+          
+          // Then sort by score, wins, rounds won
           if (b.score !== a.score) return b.score - a.score
           if (b.wins !== a.wins) return b.wins - a.wins
           if (b.rounds_won !== a.rounds_won) return b.rounds_won - a.rounds_won
@@ -215,19 +255,8 @@ export default function Leaderboard() {
                       <div className="w-10 sm:w-12 flex-shrink-0 flex justify-center">
                         {getRankIcon(index)}
                       </div>
-                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center border-2 overflow-hidden flex-shrink-0" style={{
-                        backgroundColor: 'rgba(255, 0, 255, 0.15)',
-                        borderColor: '#FF00FF'
-                      }}>
-                        {player.photo_url ? (
-                          <img 
-                            src={player.photo_url} 
-                            alt={player.username}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <FaUser style={{ color: '#FF00FF' }} className="text-lg sm:text-xl" />
-                        )}
+                      <div className="flex-shrink-0">
+                        <Avatar profile={player} size="lg" className="w-14 h-14 sm:w-16 sm:h-16" isOnline={onlineStatus[player.id] === true} />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="text-base sm:text-lg font-black uppercase tracking-wider truncate" style={{ color: 'rgb(242, 174, 187)' }}>
@@ -239,6 +268,15 @@ export default function Leaderboard() {
                       </div>
                     </div>
                     <div className="flex items-center space-x-4 sm:space-x-6 w-full sm:w-auto justify-between sm:justify-end">
+                      {player.win_streak > 3 && (
+                        <div className="text-center">
+                          <div className="text-lg sm:text-xl font-black flex items-center justify-center space-x-1" style={{ color: '#FF4500' }}>
+                            <FaFire className="text-base sm:text-lg" />
+                            <span>{player.win_streak}</span>
+                          </div>
+                          <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(255, 69, 0, 0.8)' }}>Streak</div>
+                        </div>
+                      )}
                       <div className="text-center">
                         <div className="text-lg sm:text-xl font-black" style={{ color: '#39FF14' }}>{player.wins}</div>
                         <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(57, 255, 20, 0.8)' }}>Wins</div>

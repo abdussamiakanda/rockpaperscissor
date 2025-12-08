@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { FaUser, FaSignOutAlt, FaTrophy, FaBars, FaTimes, FaThLarge, FaCoffee } from 'react-icons/fa'
+import { FaUser, FaSignOutAlt, FaTrophy, FaBars, FaTimes, FaThLarge, FaCoffee, FaCheck, FaSpinner } from 'react-icons/fa'
 import { GiStoneBlock } from 'react-icons/gi'
 import { motion, AnimatePresence } from 'framer-motion'
+import { ref, get, update, onValue, off, remove } from 'firebase/database'
+import { db } from '../lib/firebase'
+import Avatar from './Avatar'
 
 export default function Layout({ children }) {
   const { user, profile, signOut } = useAuth()
@@ -11,6 +14,11 @@ export default function Layout({ children }) {
   const location = useLocation()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [currentBrandWord, setCurrentBrandWord] = useState(0)
+  const [pendingChallenge, setPendingChallenge] = useState(null)
+  const [challengerProfile, setChallengerProfile] = useState(null)
+  const [processingChallenge, setProcessingChallenge] = useState(false)
+  const [showDeniedModal, setShowDeniedModal] = useState(false)
+  const [deniedChallengerName, setDeniedChallengerName] = useState('')
   
   const brandWords = ['Rock', 'Paper', 'Scissors']
   const brandColors = ['#FFD700', '#FF00FF', '#39FF14']
@@ -25,6 +33,135 @@ export default function Layout({ children }) {
 
     return () => clearInterval(interval)
   }, [brandWords.length])
+
+  // Listen for pending challenges in real-time
+  useEffect(() => {
+    if (!user) {
+      setPendingChallenge(null)
+      setChallengerProfile(null)
+      return
+    }
+
+    const gamesRef = ref(db, 'games')
+    const unsubscribe = onValue(gamesRef, async (snapshot) => {
+      if (!snapshot.exists()) {
+        setPendingChallenge(null)
+        setChallengerProfile(null)
+        return
+      }
+
+      const allGames = snapshot.val()
+      
+      // Find pending challenge for this user
+      const challenge = Object.entries(allGames).find(([gameId, gameData]) => {
+        return gameData.challenged_user_id === user.uid &&
+               gameData.status === 'waiting' &&
+               !gameData.player2_id
+      })
+
+      if (challenge) {
+        const [gameId, gameData] = challenge
+        setPendingChallenge({ id: gameId, ...gameData })
+        
+        // Reset denied modal state when new challenge comes in
+        setShowDeniedModal(false)
+        setDeniedChallengerName('')
+        
+        // Fetch challenger profile
+        if (gameData.player1_id) {
+          const challengerRef = ref(db, `profiles/${gameData.player1_id}`)
+          const challengerSnapshot = await get(challengerRef)
+          if (challengerSnapshot.exists()) {
+            setChallengerProfile({ id: gameData.player1_id, ...challengerSnapshot.val() })
+          }
+        }
+      } else {
+        setPendingChallenge(null)
+        setChallengerProfile(null)
+        // Reset denied modal state when no challenge
+        setShowDeniedModal(false)
+        setDeniedChallengerName('')
+      }
+    }, (error) => {
+      console.error('[Layout] Challenge subscription error:', error)
+    })
+
+    return () => {
+      off(gamesRef, 'value', unsubscribe)
+    }
+  }, [user])
+
+  const handleAcceptChallenge = async () => {
+    if (!pendingChallenge || !user || processingChallenge) return
+
+    setProcessingChallenge(true)
+    // Reset denied modal state
+    setShowDeniedModal(false)
+    setDeniedChallengerName('')
+    
+    try {
+      const gameRef = ref(db, `games/${pendingChallenge.id}`)
+      
+      // Double-check the game is still available
+      const gameSnapshot = await get(gameRef)
+      if (!gameSnapshot.exists() || gameSnapshot.val().player2_id) {
+        setPendingChallenge(null)
+        setChallengerProfile(null)
+        setProcessingChallenge(false)
+        return
+      }
+
+      // Accept the challenge - join the game
+      await update(gameRef, {
+        player2_id: user.uid,
+        status: 'in_progress',
+        updated_at: new Date().toISOString(),
+      })
+
+      // Store game ID in profile
+      const profileRef = ref(db, `profiles/${user.uid}`)
+      await update(profileRef, { current_game_id: pendingChallenge.id })
+
+      // Clear challenge state
+      setPendingChallenge(null)
+      setChallengerProfile(null)
+      setProcessingChallenge(false)
+
+      // Navigate to game
+      navigate('/game')
+    } catch (error) {
+      console.error('Error accepting challenge:', error)
+      alert('Failed to accept challenge. Please try again.')
+      setProcessingChallenge(false)
+    }
+  }
+
+  const handleDenyChallenge = async () => {
+    if (!pendingChallenge || !user || processingChallenge) return
+
+    setProcessingChallenge(true)
+    // Reset denied modal state before denying
+    setShowDeniedModal(false)
+    setDeniedChallengerName('')
+    
+    try {
+      const gameRef = ref(db, `games/${pendingChallenge.id}`)
+      
+      // Delete the challenge game
+      // Note: The challenger's profile will be cleared when they detect the game is deleted
+      await remove(gameRef)
+
+      setPendingChallenge(null)
+      setChallengerProfile(null)
+      setProcessingChallenge(false)
+    } catch (error) {
+      console.error('Error denying challenge:', error)
+      setProcessingChallenge(false)
+      // Show error modal
+      setDeniedChallengerName('')
+      setShowDeniedModal(true)
+    }
+  }
 
   const handleSignOut = async () => {
     await signOut()
@@ -474,6 +611,138 @@ export default function Layout({ children }) {
       </AnimatePresence>
 
       <main className="flex-1">{children}</main>
+
+      {/* Challenge Notification Modal - Shows on all pages */}
+      <AnimatePresence>
+        {pendingChallenge && challengerProfile && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0.9)' }}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="card max-w-md w-full"
+            >
+              <div className="text-center mb-6">
+                <h2 className="text-2xl sm:text-3xl font-black mb-4 uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>
+                  Challenge Received!
+                </h2>
+                <div className="flex items-center justify-center space-x-4 mb-4">
+                  <Avatar profile={challengerProfile} size="lg" className="w-16 h-16 sm:w-20 sm:h-20" />
+                  <div>
+                    <p className="text-lg sm:text-xl font-bold" style={{ color: 'rgb(242, 174, 187)' }}>
+                      {challengerProfile.username}
+                    </p>
+                    <p className="text-sm" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>
+                      wants to play!
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex space-x-4">
+                <motion.button
+                  onClick={handleDenyChallenge}
+                  disabled={processingChallenge}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex-1 flex items-center justify-center space-x-2 py-3 rounded-lg font-bold text-sm sm:text-base uppercase tracking-wider transition-all"
+                  style={{
+                    backgroundColor: 'rgba(191, 26, 26, 0.2)',
+                    border: '2px solid #BF1A1A',
+                    color: '#BF1A1A',
+                    cursor: processingChallenge ? 'not-allowed' : 'pointer',
+                    opacity: processingChallenge ? 0.7 : 1
+                  }}
+                >
+                  <FaTimes />
+                  <span>Deny</span>
+                </motion.button>
+                <motion.button
+                  onClick={handleAcceptChallenge}
+                  disabled={processingChallenge}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex-1 flex items-center justify-center space-x-2 py-3 rounded-lg font-bold text-sm sm:text-base uppercase tracking-wider transition-all"
+                  style={{
+                    backgroundColor: 'rgba(57, 255, 20, 0.2)',
+                    border: '2px solid #39FF14',
+                    color: '#39FF14',
+                    cursor: processingChallenge ? 'not-allowed' : 'pointer',
+                    opacity: processingChallenge ? 0.7 : 1,
+                    boxShadow: processingChallenge ? 'none' : '0 2px 10px rgba(57, 255, 20, 0.25)'
+                  }}
+                >
+                  {processingChallenge ? (
+                    <FaSpinner className="animate-spin" />
+                  ) : (
+                    <FaCheck />
+                  )}
+                  <span>{processingChallenge ? 'Accepting...' : 'Accept'}</span>
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Challenge Denied Modal */}
+      <AnimatePresence>
+        {showDeniedModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0.9)' }}
+            onClick={() => {
+              setShowDeniedModal(false)
+              setDeniedChallengerName('')
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="card max-w-md w-full"
+            >
+              <div className="text-center mb-6">
+                <h2 className="text-2xl sm:text-3xl font-black mb-4 uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>
+                  Challenge Denied
+                </h2>
+                <p className="text-sm sm:text-base mb-6" style={{ color: 'rgba(242, 174, 187, 0.8)' }}>
+                  {deniedChallengerName 
+                    ? `${deniedChallengerName} denied your challenge.` 
+                    : 'Failed to deny challenge. Please try again.'}
+                </p>
+                <motion.button
+                  onClick={() => {
+                    setShowDeniedModal(false)
+                    setDeniedChallengerName('')
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-full flex items-center justify-center space-x-2 py-3 rounded-lg font-bold text-sm sm:text-base uppercase tracking-wider transition-all"
+                  style={{
+                    backgroundColor: 'rgba(255, 0, 255, 0.2)',
+                    border: '2px solid #FF00FF',
+                    color: '#FF00FF',
+                    boxShadow: '0 2px 10px rgba(255, 0, 255, 0.25)'
+                  }}
+                >
+                  <span>OK</span>
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

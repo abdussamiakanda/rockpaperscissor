@@ -18,8 +18,12 @@ Create an engaging, real-time multiplayer web application that allows users to p
 - User authentication and profile management
 - Game history and statistics tracking
 - Responsive design for mobile and desktop
-- Leaderboard system
+- Leaderboard system with online status
 - Game abandonment handling
+- Direct player challenges
+- Avatar selection and customization
+- User profiles with bio and win streaks
+- Online/offline status tracking
 - Animated UI with smooth transitions
 
 ---
@@ -76,11 +80,15 @@ Create an engaging, real-time multiplayer web application that allows users to p
 │  │  - player2_choice       │  │
 │  │  - turn_results[]       │  │
 │  │  - status               │  │
+│  │  - challenged_user_id   │  │
 │  └─────────────────────────┘  │
 │  ┌─────────────────────────┐  │
 │  │  profiles/              │  │
 │  │  - user_id              │  │
 │  │  - username             │  │
+│  │  - avatar               │  │
+│  │  - bio                  │  │
+│  │  - is_online            │  │
 │  │  - current_game_id      │  │
 │  └─────────────────────────┘  │
 └───────────────────────────────┘
@@ -232,11 +240,19 @@ turn_results: [
 - Touch-friendly button sizes on mobile
 - Consistent color scheme using inline styles for cross-device compatibility
 - Viewport meta tag configured for 1:1 UX ratio on mobile
+- Flex-wrap for profile headers and game cards
+- Consistent horizontal layouts across devices
 
 **Responsive Breakpoints:**
 - Mobile: `< 640px` - Stacked layouts, larger touch targets
 - Tablet: `640px - 1024px` - Hybrid layouts
 - Desktop: `> 1024px` - Full horizontal layouts
+
+**Layout Consistency:**
+- Profile headers use flex-wrap for responsive wrapping
+- Challenge button positioned on right even when wrapped
+- Game cards maintain horizontal layout with badge on right
+- Avatar sizes scale appropriately across breakpoints
 
 ### 4.8 Animation System
 
@@ -248,12 +264,54 @@ turn_results: [
 - Round result reveals
 - Loading states with contextual animations
 - Game history modal animations (three-shake reveal)
+- Challenge notification modals
+- Avatar selection modal
+- Timeout and denial modals
 
 **Animation Highlights:**
 - Spring physics for natural motion
 - Conditional animations based on game state
 - Optimized re-renders using `AnimatePresence`
 - Context-aware loading spinner (cycling Rock/Paper/Scissors icons)
+- Smooth modal transitions with backdrop
+- Pulsing animations for online status indicators
+
+### 4.9 Avatar Selection System
+
+**Challenge**: Providing users with customizable avatars while maintaining consistency.
+
+**Solution**:
+- Created reusable Avatar component with 12 icon options
+- Centralized AVATAR_OPTIONS array for easy expansion
+- Priority system: selected avatar → photo URL → default icon
+- Consistent sizing across all screen sizes
+- Online status indicator integrated into avatar component
+
+### 4.10 Direct Challenge System
+
+**Challenge**: Allowing players to challenge specific users with real-time notifications.
+
+**Solution**:
+- Challenge button on profile pages (for other users)
+- Creates game with `challenged_user_id` field
+- Global challenge notification in Layout component (visible on all pages)
+- Real-time listener detects pending challenges
+- Accept/deny functionality with proper state management
+- 30-second timeout for challenge acceptance
+- Personalized waiting messages for challenged games
+- Modal-based feedback for timeouts and denials
+
+### 4.11 Online Status Tracking
+
+**Challenge**: Tracking and displaying user online/offline status reliably.
+
+**Solution**:
+- Firebase `onDisconnect` handlers to automatically set offline status
+- Real-time subscriptions to `is_online` field in profiles
+- Online count calculation on dashboard
+- Visual indicators (green pulsing dots) on avatars
+- Status updates on login/logout
+- Proper cleanup of disconnect handlers
 
 ---
 
@@ -265,10 +323,14 @@ turn_results: [
 - Automatic turn resolution
 
 ### 5.2 User Profiles
-- Comprehensive statistics (wins, losses, draws, win rate)
+- Comprehensive statistics (wins, losses, draws, win rate, win streaks)
 - Recent games history (last 20 games)
 - Game details modal with round-by-round animations
 - View other players' profiles and game history
+- Customizable avatars (12 unique icon options)
+- User bio (150 character limit)
+- Online/offline status indicator
+- Direct challenge button for other players
 
 ### 5.3 Game History Viewer
 - Modal interface for viewing completed games
@@ -279,10 +341,14 @@ turn_results: [
 - Date/time and overall result display
 
 ### 5.4 Leaderboard
-- Ranked by total wins
+- Shows all registered users (prioritizes players with games)
+- Ranked by performance score (rounds won, game wins/losses)
 - Real-time updates
 - User profile links
 - Win rate display
+- Win streak indicators (for streaks > 3)
+- Online status indicators on avatars
+- Comprehensive statistics (wins, losses, draws, score)
 
 ### 5.5 Matchmaking
 - Queue-based system
@@ -294,6 +360,27 @@ turn_results: [
 - 30-second timeout for unresponsive players
 - Clear messaging for both players
 - Proper cleanup and state recovery
+
+### 5.7 Direct Challenges
+- Challenge specific players from their profile
+- Real-time challenge notifications (appears on all pages)
+- Accept/deny challenge functionality
+- 30-second timeout for challenge acceptance
+- Personalized waiting messages for challenged games
+- Challenge denial handling with user feedback
+
+### 5.8 Avatar System
+- 12 unique avatar options (Rock, Paper, Scissors, Trophy, Fire, Star, Crown, Robot, Alien, Ghost, Ninja, Wizard)
+- Customizable avatar selection
+- Consistent avatar display across app (Profile, Leaderboard, Layout)
+- Avatar component with online status indicator
+
+### 5.9 Online Status Tracking
+- Real-time online/offline status for all users
+- Online count display on dashboard
+- Visual indicators (green pulsing dot) on avatars
+- Automatic offline status on disconnect
+- Firebase onDisconnect handlers for reliable status updates
 
 ---
 
@@ -343,6 +430,25 @@ turn_results: [
 - Avoid Tailwind opacity classes for critical colors
 - Test on multiple devices
 - Define color constants for consistency
+
+### Challenge 6: Challenge System Permission Errors
+**Problem**: Attempting to update challenger's profile when challenge is denied, causing PERMISSION_DENIED errors.
+
+**Solution**:
+- Removed unauthorized profile updates
+- Only delete the challenge game when denied
+- Challenger's profile clears automatically via timeout or game listener
+- Respect Firebase security rules strictly
+
+### Challenge 7: Username Not Being Set During Signup
+**Problem**: Race condition where fetchProfile was overwriting the username with a default value.
+
+**Solution**:
+- Added username validation and normalization
+- Set profile in state immediately after signup
+- Added delay before fetchProfile to ensure profile is written
+- Prevented fetchProfile from creating default profiles after signup
+- Normalized username (trim and lowercase) for consistency
 
 ---
 
@@ -429,13 +535,17 @@ turn_results: [
 1. **Chat System**: In-game chat between players
 2. **Tournament Mode**: Bracket-style tournaments
 3. **Achievements**: Badges and achievements system
-4. **Friend System**: Add friends and challenge directly
+4. **Friend System**: Enhanced friend system with friend lists
 5. **Spectator Mode**: Watch ongoing games
 6. **Custom Rules**: Different game modes (best of 5, 7, etc.)
 7. **Sound Effects**: Audio feedback for actions
-8. **Push Notifications**: Notify users when opponent makes a move
+8. **Push Notifications**: Notify users when opponent makes a move or challenge received
 9. **Analytics**: Track user engagement and game statistics
 10. **PWA Support**: Install as progressive web app
+11. **Avatar Customization**: More avatar options and custom colors
+12. **Profile Themes**: Customizable profile themes
+13. **Game Replay**: Enhanced game replay with animations
+14. **Statistics Dashboard**: More detailed statistics and charts
 
 ---
 
@@ -443,11 +553,11 @@ turn_results: [
 
 This project successfully demonstrates the development of a real-time multiplayer web application using modern web technologies. The combination of React, Firebase, and thoughtful UX design resulted in an engaging, performant game that handles edge cases gracefully.
 
-Key takeaways include the importance of proper state management in real-time applications, security-first development practices, and the value of comprehensive user experience design. The project showcases skills in full-stack development, real-time synchronization, responsive design, and deployment.
+Key takeaways include the importance of proper state management in real-time applications, security-first development practices, and the value of comprehensive user experience design. The project showcases skills in full-stack development, real-time synchronization, responsive design, user experience design, and deployment.
 
 **Project Status**: ✅ Production-ready and deployed
 
-**Technologies Mastered**: React, Firebase, Real-time Databases, Responsive Design, Animation, Security Rules
+**Technologies Mastered**: React, Firebase, Real-time Databases, Responsive Design, Animation, Security Rules, State Management, Component Architecture, User Authentication, Online Presence Systems
 
 ---
 

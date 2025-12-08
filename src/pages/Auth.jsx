@@ -238,6 +238,9 @@ export default function Auth() {
                   required
                 />
               </div>
+              <p className="mt-1 text-xs" style={{ color: 'rgba(242, 174, 187, 0.6)' }}>
+                Your email is private and will not be shown to other players
+              </p>
             </div>
 
             <div>

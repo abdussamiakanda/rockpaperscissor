@@ -3,9 +3,9 @@ import { FaHandRock, FaHandPaper, FaHandScissors } from 'react-icons/fa'
 
 export default function LoadingSpinner({ message = 'Loading...' }) {
   const choices = [
-    { icon: FaHandRock, color: 'rgba(255, 215, 0, 0.8)' },
-    { icon: FaHandPaper, color: 'rgba(255, 0, 255, 0.8)' },
-    { icon: FaHandScissors, color: 'rgba(57, 255, 20, 0.8)' },
+    { icon: FaHandRock, color: '#F4D160' },
+    { icon: FaHandPaper, color: '#E94560' },
+    { icon: FaHandScissors, color: '#4ECCA3' },
   ]
 
   return (
@@ -47,11 +47,10 @@ export default function LoadingSpinner({ message = 'Loading...' }) {
           ease: "easeInOut"
         }}
         className="text-lg sm:text-xl md:text-2xl font-black uppercase tracking-wider"
-        style={{ color: 'rgb(242, 174, 187)' }}
+        style={{ color: '#EAEAEA' }}
       >
         {message}
       </motion.p>
     </div>
   )
 }
-

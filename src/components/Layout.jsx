@@ -21,7 +21,7 @@ export default function Layout({ children }) {
   const [deniedChallengerName, setDeniedChallengerName] = useState('')
   
   const brandWords = ['Rock', 'Paper', 'Scissors']
-  const brandColors = ['#FFD700', '#FF00FF', '#39FF14']
+  const brandColors = ['#F4D160', '#E94560', '#4ECCA3']
   
   const isActive = (path) => location.pathname === path
 
@@ -29,7 +29,7 @@ export default function Layout({ children }) {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentBrandWord((prev) => (prev + 1) % brandWords.length)
-    }, 1500) // Change word every 1.5 seconds
+    }, 1500)
 
     return () => clearInterval(interval)
   }, [brandWords.length])
@@ -52,7 +52,6 @@ export default function Layout({ children }) {
 
       const allGames = snapshot.val()
       
-      // Find pending challenge for this user
       const challenge = Object.entries(allGames).find(([gameId, gameData]) => {
         return gameData.challenged_user_id === user.uid &&
                gameData.status === 'waiting' &&
@@ -63,11 +62,9 @@ export default function Layout({ children }) {
         const [gameId, gameData] = challenge
         setPendingChallenge({ id: gameId, ...gameData })
         
-        // Reset denied modal state when new challenge comes in
         setShowDeniedModal(false)
         setDeniedChallengerName('')
         
-        // Fetch challenger profile
         if (gameData.player1_id) {
           const challengerRef = ref(db, `profiles/${gameData.player1_id}`)
           const challengerSnapshot = await get(challengerRef)
@@ -78,7 +75,6 @@ export default function Layout({ children }) {
       } else {
         setPendingChallenge(null)
         setChallengerProfile(null)
-        // Reset denied modal state when no challenge
         setShowDeniedModal(false)
         setDeniedChallengerName('')
       }
@@ -95,14 +91,12 @@ export default function Layout({ children }) {
     if (!pendingChallenge || !user || processingChallenge) return
 
     setProcessingChallenge(true)
-    // Reset denied modal state
     setShowDeniedModal(false)
     setDeniedChallengerName('')
     
     try {
       const gameRef = ref(db, `games/${pendingChallenge.id}`)
       
-      // Double-check the game is still available
       const gameSnapshot = await get(gameRef)
       if (!gameSnapshot.exists() || gameSnapshot.val().player2_id) {
         setPendingChallenge(null)
@@ -111,23 +105,19 @@ export default function Layout({ children }) {
         return
       }
 
-      // Accept the challenge - join the game
       await update(gameRef, {
         player2_id: user.uid,
         status: 'in_progress',
         updated_at: new Date().toISOString(),
       })
 
-      // Store game ID in profile
       const profileRef = ref(db, `profiles/${user.uid}`)
       await update(profileRef, { current_game_id: pendingChallenge.id })
 
-      // Clear challenge state
       setPendingChallenge(null)
       setChallengerProfile(null)
       setProcessingChallenge(false)
 
-      // Navigate to game
       navigate('/game')
     } catch (error) {
       console.error('Error accepting challenge:', error)
@@ -140,15 +130,11 @@ export default function Layout({ children }) {
     if (!pendingChallenge || !user || processingChallenge) return
 
     setProcessingChallenge(true)
-    // Reset denied modal state before denying
     setShowDeniedModal(false)
     setDeniedChallengerName('')
     
     try {
       const gameRef = ref(db, `games/${pendingChallenge.id}`)
-      
-      // Delete the challenge game
-      // Note: The challenger's profile will be cleared when they detect the game is deleted
       await remove(gameRef)
 
       setPendingChallenge(null)
@@ -157,7 +143,6 @@ export default function Layout({ children }) {
     } catch (error) {
       console.error('Error denying challenge:', error)
       setProcessingChallenge(false)
-      // Show error modal
       setDeniedChallengerName('')
       setShowDeniedModal(true)
     }
@@ -175,7 +160,7 @@ export default function Layout({ children }) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <nav className="border-b-2 border-brand-secondary sticky top-0 z-50" style={{ backgroundColor: '#1a1a2e' }}>
+      <nav className="border-b-2 sticky top-0 z-50" style={{ backgroundColor: '#1A1A2E', borderColor: '#0F3460' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16">
             <Link to="/" className="flex items-center space-x-2 sm:space-x-3">
@@ -205,9 +190,9 @@ export default function Layout({ children }) {
                 </div>
                 {/* Desktop: Static text */}
                 <div className="hidden md:flex md:items-center md:space-x-1">
-                  <span className="text-base md:text-lg font-black uppercase tracking-wider leading-tight" style={{ color: '#FFD700' }}>Rock</span>
-                  <span className="text-base md:text-lg font-black uppercase tracking-wider leading-tight" style={{ color: '#FF00FF' }}>Paper</span>
-                  <span className="text-base md:text-lg font-black uppercase tracking-wider leading-tight" style={{ color: '#39FF14' }}>Scissors</span>
+                  <span className="text-base md:text-lg font-black uppercase tracking-wider leading-tight" style={{ color: '#F4D160' }}>Rock</span>
+                  <span className="text-base md:text-lg font-black uppercase tracking-wider leading-tight" style={{ color: '#E94560' }}>Paper</span>
+                  <span className="text-base md:text-lg font-black uppercase tracking-wider leading-tight" style={{ color: '#4ECCA3' }}>Scissors</span>
                 </div>
               </div>
             </Link>
@@ -220,95 +205,95 @@ export default function Layout({ children }) {
                     to="/dashboard"
                     className="flex items-center space-x-1.5 text-sm font-semibold transition-colors px-2 py-1"
                     style={{ 
-                      color: isActive('/dashboard') ? 'rgb(242, 174, 187)' : 'rgba(242, 174, 187, 0.8)',
-                      borderBottom: isActive('/dashboard') ? '2px solid #FF00FF' : 'none'
+                      color: isActive('/dashboard') ? '#EAEAEA' : 'rgba(234, 234, 234, 0.7)',
+                      borderBottom: isActive('/dashboard') ? '2px solid #E94560' : 'none'
                     }}
                     onMouseEnter={(e) => {
                       if (!isActive('/dashboard')) {
-                        e.currentTarget.style.color = 'rgb(242, 174, 187)'
+                        e.currentTarget.style.color = '#EAEAEA'
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!isActive('/dashboard')) {
-                        e.currentTarget.style.color = 'rgba(242, 174, 187, 0.8)'
+                        e.currentTarget.style.color = 'rgba(234, 234, 234, 0.7)'
                       }
                     }}
                   >
-                    <FaThLarge style={{ color: '#FF00FF' }} className="text-sm" />
+                    <FaThLarge style={{ color: '#E94560' }} className="text-sm" />
                     <span>Dashboard</span>
                   </Link>
                   <Link
                     to={profile?.username ? `/profile/${profile.username}` : '/profile'}
                     className="flex items-center space-x-1.5 text-sm font-semibold transition-colors px-2 py-1"
                     style={{ 
-                      color: (isActive('/profile') || (profile?.username && location.pathname === `/profile/${profile.username}`)) ? 'rgb(242, 174, 187)' : 'rgba(242, 174, 187, 0.8)',
-                      borderBottom: (isActive('/profile') || (profile?.username && location.pathname === `/profile/${profile.username}`)) ? '2px solid #FF00FF' : 'none'
+                      color: (isActive('/profile') || (profile?.username && location.pathname === `/profile/${profile.username}`)) ? '#EAEAEA' : 'rgba(234, 234, 234, 0.7)',
+                      borderBottom: (isActive('/profile') || (profile?.username && location.pathname === `/profile/${profile.username}`)) ? '2px solid #E94560' : 'none'
                     }}
                     onMouseEnter={(e) => {
                       if (!isActive('/profile') && !(profile?.username && location.pathname === `/profile/${profile.username}`)) {
-                        e.currentTarget.style.color = 'rgb(242, 174, 187)'
+                        e.currentTarget.style.color = '#EAEAEA'
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!isActive('/profile') && !(profile?.username && location.pathname === `/profile/${profile.username}`)) {
-                        e.currentTarget.style.color = 'rgba(242, 174, 187, 0.8)'
+                        e.currentTarget.style.color = 'rgba(234, 234, 234, 0.7)'
                       }
                     }}
                   >
-                    <FaUser style={{ color: '#FF00FF' }} className="text-sm" />
+                    <FaUser style={{ color: '#E94560' }} className="text-sm" />
                     <span>{profile?.username || 'Profile'}</span>
                   </Link>
                   <Link
                     to="/leaderboard"
                     className="flex items-center space-x-1.5 text-sm font-semibold transition-colors px-2 py-1"
                     style={{ 
-                      color: isActive('/leaderboard') ? 'rgb(242, 174, 187)' : 'rgba(242, 174, 187, 0.8)',
-                      borderBottom: isActive('/leaderboard') ? '2px solid #FF00FF' : 'none'
+                      color: isActive('/leaderboard') ? '#EAEAEA' : 'rgba(234, 234, 234, 0.7)',
+                      borderBottom: isActive('/leaderboard') ? '2px solid #E94560' : 'none'
                     }}
                     onMouseEnter={(e) => {
                       if (!isActive('/leaderboard')) {
-                        e.currentTarget.style.color = 'rgb(242, 174, 187)'
+                        e.currentTarget.style.color = '#EAEAEA'
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!isActive('/leaderboard')) {
-                        e.currentTarget.style.color = 'rgba(242, 174, 187, 0.8)'
+                        e.currentTarget.style.color = 'rgba(234, 234, 234, 0.7)'
                       }
                     }}
                   >
-                    <FaTrophy style={{ color: '#FF00FF' }} className="text-sm" />
+                    <FaTrophy style={{ color: '#E94560' }} className="text-sm" />
                     <span>Leaderboard</span>
                   </Link>
                   <Link
                     to="/buy-me-coffee"
                     className="flex items-center space-x-1.5 text-sm font-semibold transition-colors px-2 py-1"
                     style={{ 
-                      color: isActive('/buy-me-coffee') ? 'rgb(242, 174, 187)' : 'rgba(242, 174, 187, 0.8)',
-                      borderBottom: isActive('/buy-me-coffee') ? '2px solid #FF00FF' : 'none'
+                      color: isActive('/buy-me-coffee') ? '#EAEAEA' : 'rgba(234, 234, 234, 0.7)',
+                      borderBottom: isActive('/buy-me-coffee') ? '2px solid #E94560' : 'none'
                     }}
                     onMouseEnter={(e) => {
                       if (!isActive('/buy-me-coffee')) {
-                        e.currentTarget.style.color = 'rgb(242, 174, 187)'
+                        e.currentTarget.style.color = '#EAEAEA'
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!isActive('/buy-me-coffee')) {
-                        e.currentTarget.style.color = 'rgba(242, 174, 187, 0.8)'
+                        e.currentTarget.style.color = 'rgba(234, 234, 234, 0.7)'
                       }
                     }}
                   >
-                    <FaCoffee style={{ color: '#FFD700' }} className="text-sm" />
+                    <FaCoffee style={{ color: '#F4D160' }} className="text-sm" />
                     <span>Support</span>
                   </Link>
                   <button
                     type="button"
                     onClick={handleSignOut}
                     className="flex items-center space-x-1.5 text-sm font-semibold transition-colors px-2 py-1"
-                    style={{ color: 'rgba(242, 174, 187, 0.8)' }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = 'rgb(242, 174, 187)'}
-                    onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(242, 174, 187, 0.8)'}
+                    style={{ color: 'rgba(234, 234, 234, 0.7)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = '#EAEAEA'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(234, 234, 234, 0.7)'}
                   >
-                    <FaSignOutAlt style={{ color: '#FFD700' }} className="text-sm" />
+                    <FaSignOutAlt style={{ color: '#F4D160' }} className="text-sm" />
                     <span>Sign Out</span>
                   </button>
                 </>
@@ -318,21 +303,21 @@ export default function Layout({ children }) {
                     to="/buy-me-coffee"
                     className="flex items-center space-x-1.5 text-sm font-semibold transition-colors px-2 py-1"
                     style={{ 
-                      color: isActive('/buy-me-coffee') ? 'rgb(242, 174, 187)' : 'rgba(242, 174, 187, 0.8)',
-                      borderBottom: isActive('/buy-me-coffee') ? '2px solid #FF00FF' : 'none'
+                      color: isActive('/buy-me-coffee') ? '#EAEAEA' : 'rgba(234, 234, 234, 0.7)',
+                      borderBottom: isActive('/buy-me-coffee') ? '2px solid #E94560' : 'none'
                     }}
                     onMouseEnter={(e) => {
                       if (!isActive('/buy-me-coffee')) {
-                        e.currentTarget.style.color = 'rgb(242, 174, 187)'
+                        e.currentTarget.style.color = '#EAEAEA'
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!isActive('/buy-me-coffee')) {
-                        e.currentTarget.style.color = 'rgba(242, 174, 187, 0.8)'
+                        e.currentTarget.style.color = 'rgba(234, 234, 234, 0.7)'
                       }
                     }}
                   >
-                    <FaCoffee style={{ color: '#FFD700' }} className="text-sm" />
+                    <FaCoffee style={{ color: '#F4D160' }} className="text-sm" />
                     <span>Support</span>
                   </Link>
                   <motion.div
@@ -343,18 +328,18 @@ export default function Layout({ children }) {
                       to="/auth"
                       className="flex items-center justify-center space-x-2 py-2.5 px-4 rounded-lg font-semibold uppercase tracking-wider text-sm transition-all"
                       style={{
-                        backgroundColor: 'rgba(0, 245, 255, 0.15)',
-                        color: '#00F5FF',
-                        border: '2px solid #00F5FF',
+                        backgroundColor: 'rgba(233, 69, 96, 0.15)',
+                        color: '#E94560',
+                        border: '2px solid #E94560',
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = 'rgba(0, 245, 255, 0.25)'
+                        e.currentTarget.style.backgroundColor = 'rgba(233, 69, 96, 0.25)'
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'rgba(0, 245, 255, 0.15)'
+                        e.currentTarget.style.backgroundColor = 'rgba(233, 69, 96, 0.15)'
                       }}
                     >
-                      <FaUser style={{ color: '#00F5FF' }} className="text-sm" />
+                      <FaUser style={{ color: '#E94560' }} className="text-sm" />
                       <span>Login</span>
                     </Link>
                   </motion.div>
@@ -366,9 +351,9 @@ export default function Layout({ children }) {
             <button
               onClick={() => setIsMenuOpen(true)}
               className="md:hidden p-2 transition-colors"
-              style={{ color: 'rgba(242, 174, 187, 0.8)' }}
-              onMouseEnter={(e) => e.currentTarget.style.color = 'rgb(242, 174, 187)'}
-              onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(242, 174, 187, 0.8)'}
+              style={{ color: 'rgba(234, 234, 234, 0.7)' }}
+              onMouseEnter={(e) => e.currentTarget.style.color = '#EAEAEA'}
+              onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(234, 234, 234, 0.7)'}
               aria-label="Open menu"
             >
               <FaBars className="text-xl" />
@@ -397,27 +382,27 @@ export default function Layout({ children }) {
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="fixed top-0 right-0 h-full w-64 z-50 md:hidden"
-              style={{ backgroundColor: '#1a1a2e' }}
+              style={{ backgroundColor: '#1A1A2E' }}
             >
-              <div className="flex flex-col h-full border-l-2 border-brand-secondary">
+              <div className="flex flex-col h-full border-l-2" style={{ borderColor: '#0F3460' }}>
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b-2 border-brand-secondary/30">
+                <div className="flex items-center justify-between p-4 border-b-2" style={{ borderColor: 'rgba(15, 52, 96, 0.5)' }}>
                   <div className="flex items-center space-x-2">
-                    <GiStoneBlock style={{ color: '#FFD700' }} className="text-2xl" />
+                    <GiStoneBlock style={{ color: '#F4D160' }} className="text-2xl" />
                     <div className="flex flex-col">
                       <span className="text-sm font-black uppercase tracking-wider leading-tight">
-                        <span style={{ color: '#FFD700' }}>Rock</span>{' '}
-                        <span style={{ color: '#FF00FF' }}>Paper</span>
+                        <span style={{ color: '#F4D160' }}>Rock</span>{' '}
+                        <span style={{ color: '#E94560' }}>Paper</span>
                       </span>
-                      <span className="text-sm font-black uppercase tracking-wider leading-tight" style={{ color: '#39FF14' }}>Scissors</span>
+                      <span className="text-sm font-black uppercase tracking-wider leading-tight" style={{ color: '#4ECCA3' }}>Scissors</span>
                     </div>
                   </div>
                   <button
                     onClick={closeMenu}
                     className="p-2 transition-colors"
-                    style={{ color: 'rgba(242, 174, 187, 0.8)' }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = 'rgb(242, 174, 187)'}
-                    onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(242, 174, 187, 0.8)'}
+                    style={{ color: 'rgba(234, 234, 234, 0.7)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = '#EAEAEA'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(234, 234, 234, 0.7)'}
                     aria-label="Close menu"
                   >
                     <FaTimes className="text-xl" />
@@ -433,24 +418,24 @@ export default function Layout({ children }) {
                         onClick={closeMenu}
                         className="flex items-center space-x-3 px-6 py-4 transition-all"
                         style={{ 
-                          color: isActive('/dashboard') ? 'rgb(242, 174, 187)' : 'rgba(242, 174, 187, 0.8)',
-                          backgroundColor: isActive('/dashboard') ? 'rgba(242, 174, 187, 0.15)' : 'transparent',
-                          borderLeft: isActive('/dashboard') ? '3px solid #FF00FF' : 'none'
+                          color: isActive('/dashboard') ? '#EAEAEA' : 'rgba(234, 234, 234, 0.7)',
+                          backgroundColor: isActive('/dashboard') ? 'rgba(233, 69, 96, 0.15)' : 'transparent',
+                          borderLeft: isActive('/dashboard') ? '3px solid #E94560' : 'none'
                         }}
                         onMouseEnter={(e) => {
                           if (!isActive('/dashboard')) {
-                            e.currentTarget.style.color = 'rgb(242, 174, 187)'
-                            e.currentTarget.style.backgroundColor = 'rgba(242, 174, 187, 0.1)'
+                            e.currentTarget.style.color = '#EAEAEA'
+                            e.currentTarget.style.backgroundColor = 'rgba(233, 69, 96, 0.1)'
                           }
                         }}
                         onMouseLeave={(e) => {
                           if (!isActive('/dashboard')) {
-                            e.currentTarget.style.color = 'rgba(242, 174, 187, 0.8)'
+                            e.currentTarget.style.color = 'rgba(234, 234, 234, 0.7)'
                             e.currentTarget.style.backgroundColor = 'transparent'
                           }
                         }}
                       >
-                        <FaThLarge style={{ color: '#FF00FF' }} />
+                        <FaThLarge style={{ color: '#E94560' }} />
                         <span className="font-semibold">Dashboard</span>
                       </Link>
                       <Link
@@ -458,24 +443,24 @@ export default function Layout({ children }) {
                         onClick={closeMenu}
                         className="flex items-center space-x-3 px-6 py-4 transition-all"
                         style={{ 
-                          color: (isActive('/profile') || (profile?.username && location.pathname === `/profile/${profile.username}`)) ? 'rgb(242, 174, 187)' : 'rgba(242, 174, 187, 0.8)',
-                          backgroundColor: (isActive('/profile') || (profile?.username && location.pathname === `/profile/${profile.username}`)) ? 'rgba(242, 174, 187, 0.15)' : 'transparent',
-                          borderLeft: (isActive('/profile') || (profile?.username && location.pathname === `/profile/${profile.username}`)) ? '3px solid #FF00FF' : 'none'
+                          color: (isActive('/profile') || (profile?.username && location.pathname === `/profile/${profile.username}`)) ? '#EAEAEA' : 'rgba(234, 234, 234, 0.7)',
+                          backgroundColor: (isActive('/profile') || (profile?.username && location.pathname === `/profile/${profile.username}`)) ? 'rgba(233, 69, 96, 0.15)' : 'transparent',
+                          borderLeft: (isActive('/profile') || (profile?.username && location.pathname === `/profile/${profile.username}`)) ? '3px solid #E94560' : 'none'
                         }}
                         onMouseEnter={(e) => {
                           if (!isActive('/profile') && !(profile?.username && location.pathname === `/profile/${profile.username}`)) {
-                            e.currentTarget.style.color = 'rgb(242, 174, 187)'
-                            e.currentTarget.style.backgroundColor = 'rgba(242, 174, 187, 0.1)'
+                            e.currentTarget.style.color = '#EAEAEA'
+                            e.currentTarget.style.backgroundColor = 'rgba(233, 69, 96, 0.1)'
                           }
                         }}
                         onMouseLeave={(e) => {
                           if (!isActive('/profile') && !(profile?.username && location.pathname === `/profile/${profile.username}`)) {
-                            e.currentTarget.style.color = 'rgba(242, 174, 187, 0.8)'
+                            e.currentTarget.style.color = 'rgba(234, 234, 234, 0.7)'
                             e.currentTarget.style.backgroundColor = 'transparent'
                           }
                         }}
                       >
-                        <FaUser style={{ color: '#FF00FF' }} />
+                        <FaUser style={{ color: '#E94560' }} />
                         <span className="font-semibold">{profile?.username || 'Profile'}</span>
                       </Link>
                       <Link
@@ -483,24 +468,24 @@ export default function Layout({ children }) {
                         onClick={closeMenu}
                         className="flex items-center space-x-3 px-6 py-4 transition-all"
                         style={{ 
-                          color: isActive('/leaderboard') ? 'rgb(242, 174, 187)' : 'rgba(242, 174, 187, 0.8)',
-                          backgroundColor: isActive('/leaderboard') ? 'rgba(242, 174, 187, 0.15)' : 'transparent',
-                          borderLeft: isActive('/leaderboard') ? '3px solid #FF00FF' : 'none'
+                          color: isActive('/leaderboard') ? '#EAEAEA' : 'rgba(234, 234, 234, 0.7)',
+                          backgroundColor: isActive('/leaderboard') ? 'rgba(233, 69, 96, 0.15)' : 'transparent',
+                          borderLeft: isActive('/leaderboard') ? '3px solid #E94560' : 'none'
                         }}
                         onMouseEnter={(e) => {
                           if (!isActive('/leaderboard')) {
-                            e.currentTarget.style.color = 'rgb(242, 174, 187)'
-                            e.currentTarget.style.backgroundColor = 'rgba(242, 174, 187, 0.1)'
+                            e.currentTarget.style.color = '#EAEAEA'
+                            e.currentTarget.style.backgroundColor = 'rgba(233, 69, 96, 0.1)'
                           }
                         }}
                         onMouseLeave={(e) => {
                           if (!isActive('/leaderboard')) {
-                            e.currentTarget.style.color = 'rgba(242, 174, 187, 0.8)'
+                            e.currentTarget.style.color = 'rgba(234, 234, 234, 0.7)'
                             e.currentTarget.style.backgroundColor = 'transparent'
                           }
                         }}
                       >
-                        <FaTrophy style={{ color: '#FF00FF' }} />
+                        <FaTrophy style={{ color: '#E94560' }} />
                         <span className="font-semibold">Leaderboard</span>
                       </Link>
                       <Link
@@ -508,24 +493,24 @@ export default function Layout({ children }) {
                         onClick={closeMenu}
                         className="flex items-center space-x-3 px-6 py-4 transition-all"
                         style={{ 
-                          color: isActive('/buy-me-coffee') ? 'rgb(242, 174, 187)' : 'rgba(242, 174, 187, 0.8)',
-                          backgroundColor: isActive('/buy-me-coffee') ? 'rgba(242, 174, 187, 0.15)' : 'transparent',
-                          borderLeft: isActive('/buy-me-coffee') ? '3px solid #FF00FF' : 'none'
+                          color: isActive('/buy-me-coffee') ? '#EAEAEA' : 'rgba(234, 234, 234, 0.7)',
+                          backgroundColor: isActive('/buy-me-coffee') ? 'rgba(233, 69, 96, 0.15)' : 'transparent',
+                          borderLeft: isActive('/buy-me-coffee') ? '3px solid #E94560' : 'none'
                         }}
                         onMouseEnter={(e) => {
                           if (!isActive('/buy-me-coffee')) {
-                            e.currentTarget.style.color = 'rgb(242, 174, 187)'
-                            e.currentTarget.style.backgroundColor = 'rgba(242, 174, 187, 0.1)'
+                            e.currentTarget.style.color = '#EAEAEA'
+                            e.currentTarget.style.backgroundColor = 'rgba(233, 69, 96, 0.1)'
                           }
                         }}
                         onMouseLeave={(e) => {
                           if (!isActive('/buy-me-coffee')) {
-                            e.currentTarget.style.color = 'rgba(242, 174, 187, 0.8)'
+                            e.currentTarget.style.color = 'rgba(234, 234, 234, 0.7)'
                             e.currentTarget.style.backgroundColor = 'transparent'
                           }
                         }}
                       >
-                        <FaCoffee style={{ color: '#FFD700' }} />
+                        <FaCoffee style={{ color: '#F4D160' }} />
                         <span className="font-semibold">Support</span>
                       </Link>
                       <button
@@ -533,18 +518,18 @@ export default function Layout({ children }) {
                         onClick={handleSignOut}
                         className="flex items-center space-x-3 px-6 py-4 transition-all text-left"
                         style={{ 
-                          color: 'rgba(242, 174, 187, 0.8)',
+                          color: 'rgba(234, 234, 234, 0.7)',
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.color = 'rgb(242, 174, 187)'
-                          e.currentTarget.style.backgroundColor = 'rgba(242, 174, 187, 0.1)'
+                          e.currentTarget.style.color = '#EAEAEA'
+                          e.currentTarget.style.backgroundColor = 'rgba(233, 69, 96, 0.1)'
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.color = 'rgba(242, 174, 187, 0.8)'
+                          e.currentTarget.style.color = 'rgba(234, 234, 234, 0.7)'
                           e.currentTarget.style.backgroundColor = 'transparent'
                         }}
                       >
-                        <FaSignOutAlt style={{ color: '#FFD700' }} />
+                        <FaSignOutAlt style={{ color: '#F4D160' }} />
                         <span className="font-semibold">Sign Out</span>
                       </button>
                     </>
@@ -555,24 +540,24 @@ export default function Layout({ children }) {
                         onClick={closeMenu}
                         className="flex items-center space-x-3 px-6 py-4 transition-all"
                         style={{ 
-                          color: isActive('/buy-me-coffee') ? 'rgb(242, 174, 187)' : 'rgba(242, 174, 187, 0.8)',
-                          backgroundColor: isActive('/buy-me-coffee') ? 'rgba(242, 174, 187, 0.15)' : 'transparent',
-                          borderLeft: isActive('/buy-me-coffee') ? '3px solid #FF00FF' : 'none'
+                          color: isActive('/buy-me-coffee') ? '#EAEAEA' : 'rgba(234, 234, 234, 0.7)',
+                          backgroundColor: isActive('/buy-me-coffee') ? 'rgba(233, 69, 96, 0.15)' : 'transparent',
+                          borderLeft: isActive('/buy-me-coffee') ? '3px solid #E94560' : 'none'
                         }}
                         onMouseEnter={(e) => {
                           if (!isActive('/buy-me-coffee')) {
-                            e.currentTarget.style.color = 'rgb(242, 174, 187)'
-                            e.currentTarget.style.backgroundColor = 'rgba(242, 174, 187, 0.1)'
+                            e.currentTarget.style.color = '#EAEAEA'
+                            e.currentTarget.style.backgroundColor = 'rgba(233, 69, 96, 0.1)'
                           }
                         }}
                         onMouseLeave={(e) => {
                           if (!isActive('/buy-me-coffee')) {
-                            e.currentTarget.style.color = 'rgba(242, 174, 187, 0.8)'
+                            e.currentTarget.style.color = 'rgba(234, 234, 234, 0.7)'
                             e.currentTarget.style.backgroundColor = 'transparent'
                           }
                         }}
                       >
-                        <FaCoffee style={{ color: '#FFD700' }} />
+                        <FaCoffee style={{ color: '#F4D160' }} />
                         <span className="font-semibold">Support</span>
                       </Link>
                       <motion.div
@@ -584,20 +569,20 @@ export default function Layout({ children }) {
                           onClick={closeMenu}
                           className="flex items-center justify-center space-x-2 w-full py-2.5 px-4 rounded-lg font-semibold uppercase tracking-wider text-sm transition-all"
                           style={{
-                            backgroundColor: 'rgba(0, 245, 255, 0.15)',
-                            color: '#00F5FF',
-                            border: '2px solid #00F5FF',
+                            backgroundColor: 'rgba(233, 69, 96, 0.15)',
+                            color: '#E94560',
+                            border: '2px solid #E94560',
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = 'rgba(0, 245, 255, 0.25)'
+                            e.currentTarget.style.backgroundColor = 'rgba(233, 69, 96, 0.25)'
                             e.currentTarget.style.transform = 'scale(1.02)'
                           }}
                           onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = 'rgba(0, 245, 255, 0.15)'
+                            e.currentTarget.style.backgroundColor = 'rgba(233, 69, 96, 0.15)'
                             e.currentTarget.style.transform = 'scale(1)'
                           }}
                         >
-                          <FaUser style={{ color: '#00F5FF' }} className="text-sm" />
+                          <FaUser style={{ color: '#E94560' }} className="text-sm" />
                           <span>Login</span>
                         </Link>
                       </motion.div>
@@ -612,7 +597,7 @@ export default function Layout({ children }) {
 
       <main className="flex-1">{children}</main>
 
-      {/* Challenge Notification Modal - Shows on all pages */}
+      {/* Challenge Notification Modal */}
       <AnimatePresence>
         {pendingChallenge && challengerProfile && (
           <motion.div
@@ -629,16 +614,16 @@ export default function Layout({ children }) {
               className="card max-w-md w-full"
             >
               <div className="text-center mb-6">
-                <h2 className="text-2xl sm:text-3xl font-black mb-4 uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>
+                <h2 className="text-2xl sm:text-3xl font-black mb-4 uppercase tracking-wider" style={{ color: '#EAEAEA' }}>
                   Challenge Received!
                 </h2>
                 <div className="flex items-center justify-center space-x-4 mb-4">
                   <Avatar profile={challengerProfile} size="lg" className="w-16 h-16 sm:w-20 sm:h-20" />
                   <div>
-                    <p className="text-lg sm:text-xl font-bold" style={{ color: 'rgb(242, 174, 187)' }}>
+                    <p className="text-lg sm:text-xl font-bold" style={{ color: '#EAEAEA' }}>
                       {challengerProfile.username}
                     </p>
-                    <p className="text-sm" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>
+                    <p className="text-sm" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>
                       wants to play!
                     </p>
                   </div>
@@ -653,9 +638,9 @@ export default function Layout({ children }) {
                   whileTap={{ scale: 0.95 }}
                   className="flex-1 flex items-center justify-center space-x-2 py-3 rounded-lg font-bold text-sm sm:text-base uppercase tracking-wider transition-all"
                   style={{
-                    backgroundColor: 'rgba(191, 26, 26, 0.2)',
-                    border: '2px solid #BF1A1A',
-                    color: '#BF1A1A',
+                    backgroundColor: 'rgba(255, 107, 107, 0.2)',
+                    border: '2px solid #FF6B6B',
+                    color: '#FF6B6B',
                     cursor: processingChallenge ? 'not-allowed' : 'pointer',
                     opacity: processingChallenge ? 0.7 : 1
                   }}
@@ -670,12 +655,12 @@ export default function Layout({ children }) {
                   whileTap={{ scale: 0.95 }}
                   className="flex-1 flex items-center justify-center space-x-2 py-3 rounded-lg font-bold text-sm sm:text-base uppercase tracking-wider transition-all"
                   style={{
-                    backgroundColor: 'rgba(57, 255, 20, 0.2)',
-                    border: '2px solid #39FF14',
-                    color: '#39FF14',
+                    backgroundColor: 'rgba(78, 204, 163, 0.2)',
+                    border: '2px solid #4ECCA3',
+                    color: '#4ECCA3',
                     cursor: processingChallenge ? 'not-allowed' : 'pointer',
                     opacity: processingChallenge ? 0.7 : 1,
-                    boxShadow: processingChallenge ? 'none' : '0 2px 10px rgba(57, 255, 20, 0.25)'
+                    boxShadow: processingChallenge ? 'none' : '0 2px 10px rgba(78, 204, 163, 0.25)'
                   }}
                 >
                   {processingChallenge ? (
@@ -713,10 +698,10 @@ export default function Layout({ children }) {
               className="card max-w-md w-full"
             >
               <div className="text-center mb-6">
-                <h2 className="text-2xl sm:text-3xl font-black mb-4 uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>
+                <h2 className="text-2xl sm:text-3xl font-black mb-4 uppercase tracking-wider" style={{ color: '#EAEAEA' }}>
                   Challenge Denied
                 </h2>
-                <p className="text-sm sm:text-base mb-6" style={{ color: 'rgba(242, 174, 187, 0.8)' }}>
+                <p className="text-sm sm:text-base mb-6" style={{ color: 'rgba(234, 234, 234, 0.8)' }}>
                   {deniedChallengerName 
                     ? `${deniedChallengerName} denied your challenge.` 
                     : 'Failed to deny challenge. Please try again.'}
@@ -730,10 +715,10 @@ export default function Layout({ children }) {
                   whileTap={{ scale: 0.95 }}
                   className="w-full flex items-center justify-center space-x-2 py-3 rounded-lg font-bold text-sm sm:text-base uppercase tracking-wider transition-all"
                   style={{
-                    backgroundColor: 'rgba(255, 0, 255, 0.2)',
-                    border: '2px solid #FF00FF',
-                    color: '#FF00FF',
-                    boxShadow: '0 2px 10px rgba(255, 0, 255, 0.25)'
+                    backgroundColor: 'rgba(233, 69, 96, 0.2)',
+                    border: '2px solid #E94560',
+                    color: '#E94560',
+                    boxShadow: '0 2px 10px rgba(233, 69, 96, 0.25)'
                   }}
                 >
                   <span>OK</span>

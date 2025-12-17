@@ -182,10 +182,10 @@ export default function Leaderboard() {
   }
 
   const getRankIcon = (index) => {
-    if (index === 0) return <FaTrophy style={{ color: '#FFD700' }} className="text-2xl sm:text-3xl" />
+    if (index === 0) return <FaTrophy style={{ color: '#F4D160' }} className="text-2xl sm:text-3xl" />
     if (index === 1) return <FaMedal style={{ color: '#C0C0C0' }} className="text-2xl sm:text-3xl" />
     if (index === 2) return <FaAward style={{ color: '#CD7F32' }} className="text-2xl sm:text-3xl" />
-    return <span className="text-base sm:text-lg font-black" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>#{index + 1}</span>
+    return <span className="text-base sm:text-lg font-black" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>#{index + 1}</span>
   }
 
   if (loading) {
@@ -199,11 +199,11 @@ export default function Leaderboard() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-6 sm:mb-8"
       >
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black mb-3 sm:mb-4 uppercase tracking-wider flex items-center justify-center space-x-3" style={{ color: 'rgb(242, 174, 187)' }}>
-          <FaTrophy style={{ color: '#FFD700' }} className="text-3xl sm:text-4xl" />
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black mb-3 sm:mb-4 uppercase tracking-wider flex items-center justify-center space-x-3" style={{ color: '#EAEAEA' }}>
+          <FaTrophy style={{ color: '#F4D160' }} className="text-3xl sm:text-4xl" />
           <span>Leaderboard</span>
         </h1>
-        <p className="text-sm sm:text-base" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>
+        <p className="text-sm sm:text-base" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>
           Top players ranked by score (considers wins, losses, draws, and round performance)
         </p>
       </motion.div>
@@ -215,7 +215,7 @@ export default function Leaderboard() {
         className="card"
       >
         {leaderboard.length === 0 ? (
-          <p className="text-center py-8 sm:py-12 text-sm sm:text-base" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>No players yet</p>
+          <p className="text-center py-8 sm:py-12 text-sm sm:text-base" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>No players yet</p>
         ) : (
           <div className="space-y-3 sm:space-y-4">
             {leaderboard.map((player, index) => {
@@ -236,19 +236,19 @@ export default function Leaderboard() {
                     }`}
                     style={{
                       backgroundColor: index === 0 
-                        ? 'rgba(255, 215, 0, 0.15)' 
+                        ? 'rgba(244, 209, 96, 0.15)' 
                         : index === 1 
                         ? 'rgba(192, 192, 192, 0.15)' 
                         : index === 2 
                         ? 'rgba(205, 127, 50, 0.15)' 
-                        : 'rgba(255, 0, 255, 0.1)',
+                        : 'rgba(233, 69, 96, 0.1)',
                       borderColor: index === 0 
-                        ? '#FFD700' 
+                        ? '#F4D160' 
                         : index === 1 
                         ? '#C0C0C0' 
                         : index === 2 
                         ? '#CD7F32' 
-                        : 'rgba(255, 0, 255, 0.3)'
+                        : 'rgba(233, 69, 96, 0.3)'
                     }}
                   >
                     <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
@@ -259,10 +259,10 @@ export default function Leaderboard() {
                         <Avatar profile={player} size="lg" className="w-14 h-14 sm:w-16 sm:h-16" isOnline={onlineStatus[player.id] === true} />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="text-base sm:text-lg font-black uppercase tracking-wider truncate" style={{ color: 'rgb(242, 174, 187)' }}>
+                        <div className="text-base sm:text-lg font-black uppercase tracking-wider truncate" style={{ color: '#EAEAEA' }}>
                           {player.username}
                         </div>
-                        <div className="text-xs sm:text-sm" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>
+                        <div className="text-xs sm:text-sm" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>
                           {player.total_games} {player.total_games === 1 ? 'game' : 'games'} played
                         </div>
                       </div>
@@ -270,7 +270,7 @@ export default function Leaderboard() {
                     <div className="flex items-center space-x-4 sm:space-x-6 w-full sm:w-auto justify-between sm:justify-end">
                       {player.win_streak > 3 && (
                         <div className="text-center">
-                          <div className="text-lg sm:text-xl font-black flex items-center justify-center space-x-1" style={{ color: '#FF4500' }}>
+                          <div className="text-lg sm:text-xl font-black flex items-center justify-center space-x-1" style={{ color: '#FF6B6B' }}>
                             <FaFire className="text-base sm:text-lg" />
                             <span>{player.win_streak}</span>
                           </div>
@@ -278,20 +278,20 @@ export default function Leaderboard() {
                         </div>
                       )}
                       <div className="text-center">
-                        <div className="text-lg sm:text-xl font-black" style={{ color: '#39FF14' }}>{player.wins}</div>
-                        <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(57, 255, 20, 0.8)' }}>Wins</div>
+                        <div className="text-lg sm:text-xl font-black" style={{ color: '#4ECCA3' }}>{player.wins}</div>
+                        <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(78, 204, 163, 0.8)' }}>Wins</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-lg sm:text-xl font-black" style={{ color: '#BF1A1A' }}>{player.losses}</div>
-                        <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(191, 26, 26, 0.8)' }}>Losses</div>
+                        <div className="text-lg sm:text-xl font-black" style={{ color: '#FF6B6B' }}>{player.losses}</div>
+                        <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(255, 107, 107, 0.8)' }}>Losses</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-lg sm:text-xl font-black" style={{ color: '#FFD700' }}>{player.draws}</div>
-                        <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(255, 215, 0, 0.8)' }}>Draws</div>
+                        <div className="text-lg sm:text-xl font-black" style={{ color: '#F4D160' }}>{player.draws}</div>
+                        <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(244, 209, 96, 0.8)' }}>Draws</div>
                       </div>
-                      <div className="text-center border-l-2 pl-4 sm:pl-6" style={{ borderColor: 'rgba(255, 0, 255, 0.3)' }}>
-                        <div className="text-lg sm:text-xl font-black" style={{ color: '#FF00FF' }}>{player.score}</div>
-                        <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(255, 0, 255, 0.8)' }}>Score</div>
+                      <div className="text-center border-l-2 pl-4 sm:pl-6" style={{ borderColor: 'rgba(233, 69, 96, 0.3)' }}>
+                        <div className="text-lg sm:text-xl font-black" style={{ color: '#E94560' }}>{player.score}</div>
+                        <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(233, 69, 96, 0.8)' }}>Score</div>
                       </div>
                     </div>
                   </motion.div>

@@ -8,26 +8,28 @@ export default {
     extend: {
       colors: {
         // ============================================
-        // RETRO GAMING COLOR PALETTE
+        // SUNSET CYBERPUNK PALETTE (Color Hunt Inspired)
+        // https://colorhunt.co/palette/1a1a2e16213e0f3460e94560
         // ============================================
         brand: {
-          primary: '#0A0A0F',    // Deep dark blue/black - Background
-          secondary: '#00F5FF',   // Neon cyan - Primary accent
-          accent: '#FF00FF',     // Hot pink/magenta - Secondary accent
-          danger: '#FFD700',     // Gold/yellow - Highlights
-          neon: '#39FF14',       // Electric green - Accents
+          primary: '#1A1A2E',    // Deep navy - Background
+          secondary: '#E94560',   // Coral red - Primary accent
+          accent: '#0F3460',     // Dark blue - Secondary accent
+          danger: '#FF6B6B',     // Soft red - Danger/warnings
+          neon: '#4ECCA3',       // Mint green - Success/accents
+          gold: '#F4D160',       // Warm gold - Highlights
         },
         // ============================================
         // ROCK PAPER SCISSORS COLORS
         // ============================================
         rock: {
-          DEFAULT: '#FFD700',     // Gold - Rock color
+          DEFAULT: '#F4D160',     // Warm gold - Rock color
         },
         paper: {
-          DEFAULT: '#FF00FF',     // Pink/Magenta - Paper color
+          DEFAULT: '#E94560',     // Coral red - Paper color
         },
         scissors: {
-          DEFAULT: '#39FF14',    // Neon Green - Scissors color
+          DEFAULT: '#4ECCA3',    // Mint green - Scissors color
         },
       },
       animation: {
@@ -38,4 +40,3 @@ export default {
   },
   plugins: [],
 }
-

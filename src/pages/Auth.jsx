@@ -15,7 +15,6 @@ export default function Auth() {
   const { user, loading: authLoading, signIn, signUp } = useAuth()
   const navigate = useNavigate()
 
-  // Redirect to dashboard if user is already logged in
   if (authLoading) {
     return <LoadingSpinner message="Loading..." />
   }
@@ -45,7 +44,6 @@ export default function Auth() {
     setError('')
     setLoading(true)
 
-    // Validate username: only a-z and 0-9
     const usernameRegex = /^[a-z0-9]+$/
     if (!usernameRegex.test(username)) {
       setError('Username can only contain lowercase letters (a-z) and numbers (0-9)')
@@ -86,7 +84,7 @@ export default function Auth() {
         style={{ marginTop: 0 }}
       >
         {/* Tabs */}
-        <div className="flex mb-6 border-b-2 border-brand-secondary/30">
+        <div className="flex mb-6 border-b-2" style={{ borderColor: 'rgba(15, 52, 96, 0.5)' }}>
           <button
             onClick={() => {
               setActiveTab('login')
@@ -94,22 +92,21 @@ export default function Auth() {
             }}
             className={`flex-1 py-3 sm:py-4 text-center font-bold text-sm sm:text-base transition-all ${
               activeTab === 'login'
-                ? 'border-b-2 border-brand-accent'
+                ? 'border-b-2'
                 : ''
             }`}
             style={{ 
-              color: activeTab === 'login' 
-                ? 'rgb(242, 174, 187)' 
-                : 'rgba(242, 174, 187, 0.6)' 
+              color: activeTab === 'login' ? '#EAEAEA' : 'rgba(234, 234, 234, 0.5)',
+              borderColor: activeTab === 'login' ? '#E94560' : 'transparent'
             }}
             onMouseEnter={(e) => {
               if (activeTab !== 'login') {
-                e.target.style.color = 'rgba(242, 174, 187, 0.8)'
+                e.target.style.color = 'rgba(234, 234, 234, 0.7)'
               }
             }}
             onMouseLeave={(e) => {
               if (activeTab !== 'login') {
-                e.target.style.color = 'rgba(242, 174, 187, 0.6)'
+                e.target.style.color = 'rgba(234, 234, 234, 0.5)'
               }
             }}
           >
@@ -122,22 +119,21 @@ export default function Auth() {
             }}
             className={`flex-1 py-3 sm:py-4 text-center font-bold text-sm sm:text-base transition-all ${
               activeTab === 'signup'
-                ? 'border-b-2 border-brand-accent'
+                ? 'border-b-2'
                 : ''
             }`}
             style={{ 
-              color: activeTab === 'signup' 
-                ? 'rgb(242, 174, 187)' 
-                : 'rgba(242, 174, 187, 0.6)' 
+              color: activeTab === 'signup' ? '#EAEAEA' : 'rgba(234, 234, 234, 0.5)',
+              borderColor: activeTab === 'signup' ? '#E94560' : 'transparent'
             }}
             onMouseEnter={(e) => {
               if (activeTab !== 'signup') {
-                e.target.style.color = 'rgba(242, 174, 187, 0.8)'
+                e.target.style.color = 'rgba(234, 234, 234, 0.7)'
               }
             }}
             onMouseLeave={(e) => {
               if (activeTab !== 'signup') {
-                e.target.style.color = 'rgba(242, 174, 187, 0.6)'
+                e.target.style.color = 'rgba(234, 234, 234, 0.5)'
               }
             }}
           >
@@ -145,7 +141,7 @@ export default function Auth() {
           </button>
         </div>
 
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-center mb-6 sm:mb-8 uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-center mb-6 sm:mb-8 uppercase tracking-wider" style={{ color: '#EAEAEA' }}>
           {activeTab === 'login' ? 'Welcome Back' : 'Create Account'}
         </h1>
 
@@ -153,7 +149,8 @@ export default function Auth() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4 p-3 sm:p-4 bg-brand-danger/20 border-2 border-brand-danger rounded-lg text-brand-danger text-sm sm:text-base font-semibold"
+            className="mb-4 p-3 sm:p-4 rounded-lg text-sm sm:text-base font-semibold"
+            style={{ backgroundColor: 'rgba(255, 107, 107, 0.2)', border: '2px solid #FF6B6B', color: '#FF6B6B' }}
           >
             {error}
           </motion.div>
@@ -162,9 +159,9 @@ export default function Auth() {
         {activeTab === 'login' ? (
           <form onSubmit={handleLogin} className="space-y-4 sm:space-y-5">
             <div>
-              <label className="block mb-2 text-sm sm:text-base font-semibold" style={{ color: 'rgba(242, 174, 187, 0.9)' }}>Email</label>
+              <label className="block mb-2 text-sm sm:text-base font-semibold" style={{ color: 'rgba(234, 234, 234, 0.9)' }}>Email</label>
               <div className="relative">
-                <FaEnvelope className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-brand-accent text-sm sm:text-base" />
+                <FaEnvelope className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-sm sm:text-base" style={{ color: '#E94560' }} />
                 <input
                   type="email"
                   value={email}
@@ -177,9 +174,9 @@ export default function Auth() {
             </div>
 
             <div>
-              <label className="block mb-2 text-sm sm:text-base font-semibold" style={{ color: 'rgba(242, 174, 187, 0.9)' }}>Password</label>
+              <label className="block mb-2 text-sm sm:text-base font-semibold" style={{ color: 'rgba(234, 234, 234, 0.9)' }}>Password</label>
               <div className="relative">
-                <FaLock className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-brand-danger text-sm sm:text-base" />
+                <FaLock className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-sm sm:text-base" style={{ color: '#FF6B6B' }} />
                 <input
                   type="password"
                   value={password}
@@ -202,9 +199,9 @@ export default function Auth() {
         ) : (
           <form onSubmit={handleSignup} className="space-y-4 sm:space-y-5">
             <div>
-              <label className="block mb-2 text-sm sm:text-base font-semibold" style={{ color: 'rgba(242, 174, 187, 0.9)' }}>Username</label>
+              <label className="block mb-2 text-sm sm:text-base font-semibold" style={{ color: 'rgba(234, 234, 234, 0.9)' }}>Username</label>
               <div className="relative">
-                <FaUser className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-brand-accent text-sm sm:text-base" />
+                <FaUser className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-sm sm:text-base" style={{ color: '#E94560' }} />
                 <input
                   type="text"
                   value={username}
@@ -220,15 +217,15 @@ export default function Auth() {
                   required
                 />
               </div>
-              <p className="mt-1 text-xs" style={{ color: 'rgba(242, 174, 187, 0.6)' }}>
+              <p className="mt-1 text-xs" style={{ color: 'rgba(234, 234, 234, 0.5)' }}>
                 {username.length}/15 characters (lowercase letters and numbers only)
               </p>
             </div>
 
             <div>
-              <label className="block mb-2 text-sm sm:text-base font-semibold" style={{ color: 'rgba(242, 174, 187, 0.9)' }}>Email</label>
+              <label className="block mb-2 text-sm sm:text-base font-semibold" style={{ color: 'rgba(234, 234, 234, 0.9)' }}>Email</label>
               <div className="relative">
-                <FaEnvelope className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-brand-accent text-sm sm:text-base" />
+                <FaEnvelope className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-sm sm:text-base" style={{ color: '#E94560' }} />
                 <input
                   type="email"
                   value={email}
@@ -238,15 +235,15 @@ export default function Auth() {
                   required
                 />
               </div>
-              <p className="mt-1 text-xs" style={{ color: 'rgba(242, 174, 187, 0.6)' }}>
+              <p className="mt-1 text-xs" style={{ color: 'rgba(234, 234, 234, 0.5)' }}>
                 Your email is private and will not be shown to other players
               </p>
             </div>
 
             <div>
-              <label className="block mb-2 text-sm sm:text-base font-semibold" style={{ color: 'rgba(242, 174, 187, 0.9)' }}>Password</label>
+              <label className="block mb-2 text-sm sm:text-base font-semibold" style={{ color: 'rgba(234, 234, 234, 0.9)' }}>Password</label>
               <div className="relative">
-                <FaLock className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-brand-danger text-sm sm:text-base" />
+                <FaLock className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-sm sm:text-base" style={{ color: '#FF6B6B' }} />
                 <input
                   type="password"
                   value={password}
@@ -271,4 +268,3 @@ export default function Auth() {
     </div>
   )
 }
-

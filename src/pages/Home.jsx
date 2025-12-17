@@ -8,8 +8,8 @@ export default function Home() {
       {/* Retro grid background effect */}
       <div className="absolute inset-0 opacity-10 pointer-events-none" style={{
         backgroundImage: `
-          linear-gradient(rgba(0, 245, 255, 0.1) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(0, 245, 255, 0.1) 1px, transparent 1px)
+          linear-gradient(rgba(233, 69, 96, 0.1) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(233, 69, 96, 0.1) 1px, transparent 1px)
         `,
         backgroundSize: '50px 50px'
       }}></div>
@@ -26,15 +26,15 @@ export default function Home() {
           className="inline-block mb-6"
         >
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-3 sm:mb-4 relative" style={{ letterSpacing: '0.1em' }}>
-            <span style={{ color: '#FFD700' }}>
+            <span style={{ color: '#F4D160' }}>
               ROCK
             </span>
             <br />
-            <span style={{ color: '#FF00FF' }}>
+            <span style={{ color: '#E94560' }}>
               PAPER
             </span>
             <br />
-            <span style={{ color: '#39FF14' }}>
+            <span style={{ color: '#4ECCA3' }}>
               SCISSORS
             </span>
           </h1>
@@ -44,7 +44,8 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-brand-secondary mb-6 sm:mb-8 uppercase tracking-wider px-2"
+          className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold mb-6 sm:mb-8 uppercase tracking-wider px-2"
+          style={{ color: '#E94560' }}
         >
           Challenge players from around the world in real-time!
         </motion.p>
@@ -55,8 +56,8 @@ export default function Home() {
           initial={{ opacity: 0, y: 30, rotateX: -15 }}
           animate={{ opacity: 1, y: 0, rotateX: 0 }}
           transition={{ delay: 0.3, type: "spring", stiffness: 100 }}
-          className="text-center border-2 border-rock hover:border-scissors transition-all rounded-lg p-4 sm:p-6"
-          style={{ backgroundColor: 'rgba(255, 215, 0, 0.15)' }}
+          className="text-center border-2 transition-all rounded-lg p-4 sm:p-6"
+          style={{ backgroundColor: 'rgba(244, 209, 96, 0.15)', borderColor: '#F4D160' }}
         >
           <motion.div
             whileHover={{ scale: 1.2, rotate: 15 }}
@@ -65,21 +66,21 @@ export default function Home() {
           >
             <FaHandRock 
               className="text-4xl sm:text-5xl md:text-6xl mx-auto" 
-              style={{ color: '#FFD700' }}
+              style={{ color: '#F4D160' }}
             />
           </motion.div>
-          <h3 className="text-xl sm:text-2xl font-black mb-2 sm:mb-3 uppercase tracking-wider" style={{ color: '#FFD700' }}>
+          <h3 className="text-xl sm:text-2xl font-black mb-2 sm:mb-3 uppercase tracking-wider" style={{ color: '#F4D160' }}>
             Rock
           </h3>
-          <p className="text-sm sm:text-base font-semibold" style={{ color: 'rgba(255, 215, 0, 0.9)' }}>Crush your opponent's scissors</p>
+          <p className="text-sm sm:text-base font-semibold" style={{ color: 'rgba(244, 209, 96, 0.9)' }}>Crush your opponent's scissors</p>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 30, rotateX: -15 }}
           animate={{ opacity: 1, y: 0, rotateX: 0 }}
           transition={{ delay: 0.4, type: "spring", stiffness: 100 }}
-          className="text-center border-2 border-paper hover:border-scissors transition-all rounded-lg p-6"
-          style={{ backgroundColor: 'rgba(255, 0, 255, 0.15)' }}
+          className="text-center border-2 transition-all rounded-lg p-6"
+          style={{ backgroundColor: 'rgba(233, 69, 96, 0.15)', borderColor: '#E94560' }}
         >
           <motion.div
             whileHover={{ scale: 1.2, rotate: -15 }}
@@ -88,21 +89,21 @@ export default function Home() {
           >
             <FaHandPaper 
               className="text-4xl sm:text-5xl md:text-6xl mx-auto" 
-              style={{ color: '#FF00FF' }}
+              style={{ color: '#E94560' }}
             />
           </motion.div>
-          <h3 className="text-xl sm:text-2xl font-black mb-2 sm:mb-3 uppercase tracking-wider" style={{ color: '#FF00FF' }}>
+          <h3 className="text-xl sm:text-2xl font-black mb-2 sm:mb-3 uppercase tracking-wider" style={{ color: '#E94560' }}>
             Paper
           </h3>
-          <p className="text-sm sm:text-base font-semibold" style={{ color: 'rgba(255, 0, 255, 0.9)' }}>Cover your opponent's rock</p>
+          <p className="text-sm sm:text-base font-semibold" style={{ color: 'rgba(233, 69, 96, 0.9)' }}>Cover your opponent's rock</p>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 30, rotateX: -15 }}
           animate={{ opacity: 1, y: 0, rotateX: 0 }}
           transition={{ delay: 0.5, type: "spring", stiffness: 100 }}
-          className="text-center border-2 border-scissors hover:border-rock transition-all rounded-lg p-6"
-          style={{ backgroundColor: 'rgba(57, 255, 20, 0.15)' }}
+          className="text-center border-2 transition-all rounded-lg p-6"
+          style={{ backgroundColor: 'rgba(78, 204, 163, 0.15)', borderColor: '#4ECCA3' }}
         >
           <motion.div
             whileHover={{ scale: 1.2, rotate: 15 }}
@@ -111,13 +112,13 @@ export default function Home() {
           >
             <FaHandScissors 
               className="text-4xl sm:text-5xl md:text-6xl mx-auto" 
-              style={{ color: '#39FF14' }}
+              style={{ color: '#4ECCA3' }}
             />
           </motion.div>
-          <h3 className="text-xl sm:text-2xl font-black mb-2 sm:mb-3 uppercase tracking-wider" style={{ color: '#39FF14' }}>
+          <h3 className="text-xl sm:text-2xl font-black mb-2 sm:mb-3 uppercase tracking-wider" style={{ color: '#4ECCA3' }}>
             Scissors
           </h3>
-          <p className="text-sm sm:text-base font-semibold" style={{ color: 'rgba(57, 255, 20, 0.9)' }}>Cut through your opponent's paper</p>
+          <p className="text-sm sm:text-base font-semibold" style={{ color: 'rgba(78, 204, 163, 0.9)' }}>Cut through your opponent's paper</p>
         </motion.div>
       </div>
 
@@ -129,21 +130,21 @@ export default function Home() {
           className="card border-l-4"
           style={{
             borderLeftWidth: '8px',
-            borderLeftColor: 'rgba(242, 174, 187, 0.8)',
-            borderColor: 'rgba(242, 174, 187, 0.8)',
-            backgroundColor: 'rgba(242, 174, 187, 0.15)'
+            borderLeftColor: '#E94560',
+            borderColor: '#0F3460',
+            backgroundColor: 'rgba(233, 69, 96, 0.1)'
           }}
         >
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-black mb-4 sm:mb-6 flex flex-col sm:flex-row items-center sm:items-start space-y-2 sm:space-y-0 sm:space-x-4 uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-black mb-4 sm:mb-6 flex flex-col sm:flex-row items-center sm:items-start space-y-2 sm:space-y-0 sm:space-x-4 uppercase tracking-wider" style={{ color: '#EAEAEA' }}>
             <motion.div
               whileHover={{ rotate: 360, scale: 1.2 }}
               transition={{ duration: 0.6 }}
             >
-              <FaTrophy className="text-3xl sm:text-4xl" style={{ color: 'rgb(242, 174, 187)' }} />
+              <FaTrophy className="text-3xl sm:text-4xl" style={{ color: '#F4D160' }} />
             </motion.div>
             <span>Best of 3</span>
           </h2>
-          <p className="leading-relaxed text-sm sm:text-base md:text-lg font-semibold" style={{ color: 'rgba(242, 174, 187, 0.95)' }}>
+          <p className="leading-relaxed text-sm sm:text-base md:text-lg font-semibold" style={{ color: 'rgba(234, 234, 234, 0.9)' }}>
             Each game consists of 3 rounds. First player to win 2 rounds wins the match!
           </p>
         </motion.div>
@@ -155,21 +156,21 @@ export default function Home() {
           className="card border-l-4"
           style={{
             borderLeftWidth: '8px',
-            borderLeftColor: 'rgba(242, 174, 187, 0.8)',
-            borderColor: 'rgba(242, 174, 187, 0.8)',
-            backgroundColor: 'rgba(242, 174, 187, 0.15)'
+            borderLeftColor: '#4ECCA3',
+            borderColor: '#0F3460',
+            backgroundColor: 'rgba(78, 204, 163, 0.1)'
           }}
         >
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-black mb-4 sm:mb-6 flex flex-col sm:flex-row items-center sm:items-start space-y-2 sm:space-y-0 sm:space-x-4 uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-black mb-4 sm:mb-6 flex flex-col sm:flex-row items-center sm:items-start space-y-2 sm:space-y-0 sm:space-x-4 uppercase tracking-wider" style={{ color: '#EAEAEA' }}>
             <motion.div
               whileHover={{ scale: 1.2, y: -5 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
-              <FaChartLine className="text-3xl sm:text-4xl" style={{ color: 'rgb(242, 174, 187)' }} />
+              <FaChartLine className="text-3xl sm:text-4xl" style={{ color: '#4ECCA3' }} />
             </motion.div>
             <span>Track Your Stats</span>
           </h2>
-          <p className="leading-relaxed text-sm sm:text-base md:text-lg font-semibold" style={{ color: 'rgba(242, 174, 187, 0.95)' }}>
+          <p className="leading-relaxed text-sm sm:text-base md:text-lg font-semibold" style={{ color: 'rgba(234, 234, 234, 0.9)' }}>
             View your wins, losses, and win rate. Climb the leaderboard and become the champion!
           </p>
         </motion.div>

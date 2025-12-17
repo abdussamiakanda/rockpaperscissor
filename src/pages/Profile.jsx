@@ -40,9 +40,9 @@ export default function Profile() {
   const [timeoutMessage, setTimeoutMessage] = useState('')
 
   const CHOICES = {
-    rock: { icon: FaHandRock, name: 'Rock', hexColor: '#FFD700' },
-    paper: { icon: FaHandPaper, name: 'Paper', hexColor: '#FF00FF' },
-    scissors: { icon: FaHandScissors, name: 'Scissors', hexColor: '#39FF14' },
+    rock: { icon: FaHandRock, name: 'Rock', hexColor: '#F4D160' },
+    paper: { icon: FaHandPaper, name: 'Paper', hexColor: '#E94560' },
+    scissors: { icon: FaHandScissors, name: 'Scissors', hexColor: '#4ECCA3' },
   }
 
 
@@ -452,10 +452,10 @@ export default function Profile() {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
         <div className="text-center">
-          <div className="text-2xl font-black mb-4 uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>
+          <div className="text-2xl font-black mb-4 uppercase tracking-wider" style={{ color: '#EAEAEA' }}>
             Profile Not Found
           </div>
-          <p className="text-base mb-6" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>
+          <p className="text-base mb-6" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>
             The user "{urlUsername}" does not exist.
           </p>
           <button
@@ -493,9 +493,9 @@ export default function Profile() {
                   onClick={() => setShowAvatarSelector(true)}
                   className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full flex items-center justify-center border-2"
                   style={{
-                    backgroundColor: '#1a1a2e',
-                    borderColor: '#FF00FF',
-                    color: '#FF00FF'
+                    backgroundColor: '#1A1A2E',
+                    borderColor: '#E94560',
+                    color: '#E94560'
                   }}
                   title="Change Avatar"
                 >
@@ -505,7 +505,7 @@ export default function Profile() {
             </div>
             <div className="text-left flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-2">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-wider" style={{ color: '#EAEAEA' }}>
                   {targetProfile.username}
                 </h1>
                 {targetUserId && targetUserId !== user?.uid && (
@@ -513,12 +513,12 @@ export default function Profile() {
                     <div 
                       className={`w-2 h-2 rounded-full ${isOnline ? 'animate-pulse' : ''}`}
                       style={{
-                        backgroundColor: isOnline ? '#39FF14' : '#BF1A1A'
+                        backgroundColor: isOnline ? '#4ECCA3' : '#FF6B6B'
                       }}
                       title={isOnline ? 'Online' : 'Offline'}
                     />
                     <span className="text-xs font-semibold uppercase tracking-wider" style={{ 
-                      color: isOnline ? 'rgba(57, 255, 20, 0.8)' : 'rgba(191, 26, 26, 0.8)' 
+                      color: isOnline ? 'rgba(78, 204, 163, 0.8)' : 'rgba(255, 107, 107, 0.8)' 
                     }}>
                       {isOnline ? 'Online' : 'Offline'}
                     </span>
@@ -526,7 +526,7 @@ export default function Profile() {
                 )}
               </div>
               {isOwnProfile && user?.email && (
-                <p className="text-sm sm:text-base mb-2" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>{user.email}</p>
+                <p className="text-sm sm:text-base mb-2" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>{user.email}</p>
               )}
               {editingBio ? (
                 <div className="mt-2">
@@ -537,8 +537,8 @@ export default function Profile() {
                     maxLength={150}
                     className="w-full px-3 py-2 rounded-lg border-2 bg-transparent resize-none text-sm sm:text-base"
                     style={{
-                      borderColor: '#FF00FF',
-                      color: 'rgb(242, 174, 187)',
+                      borderColor: '#E94560',
+                      color: '#EAEAEA',
                       minHeight: '60px'
                     }}
                     rows={3}
@@ -551,9 +551,9 @@ export default function Profile() {
                       whileTap={{ scale: 0.95 }}
                       className="px-3 py-1.5 rounded-lg font-bold text-xs uppercase tracking-wider"
                       style={{
-                        backgroundColor: 'rgba(57, 255, 20, 0.2)',
-                        border: '2px solid #39FF14',
-                        color: '#39FF14',
+                        backgroundColor: 'rgba(78, 204, 163, 0.2)',
+                        border: '2px solid #4ECCA3',
+                        color: '#4ECCA3',
                         cursor: savingBio ? 'not-allowed' : 'pointer',
                         opacity: savingBio ? 0.7 : 1
                       }}
@@ -570,9 +570,9 @@ export default function Profile() {
                       whileTap={{ scale: 0.95 }}
                       className="px-3 py-1.5 rounded-lg font-bold text-xs uppercase tracking-wider"
                       style={{
-                        backgroundColor: 'rgba(191, 26, 26, 0.2)',
-                        border: '2px solid #BF1A1A',
-                        color: '#BF1A1A',
+                        backgroundColor: 'rgba(255, 107, 107, 0.2)',
+                        border: '2px solid #FF6B6B',
+                        color: '#FF6B6B',
                         cursor: savingBio ? 'not-allowed' : 'pointer'
                       }}
                     >
@@ -586,7 +586,7 @@ export default function Profile() {
               ) : (
                 <div className="mt-2">
                   {targetProfile.bio ? (
-                    <p className="text-sm sm:text-base mb-2" style={{ color: 'rgba(242, 174, 187, 0.8)' }}>
+                    <p className="text-sm sm:text-base mb-2" style={{ color: 'rgba(234, 234, 234, 0.8)' }}>
                       {targetProfile.bio}
                     </p>
                   ) : (
@@ -601,9 +601,9 @@ export default function Profile() {
                       whileTap={{ scale: 0.95 }}
                       className="inline-flex items-center space-x-1 px-2 py-1 rounded text-xs font-semibold uppercase tracking-wider"
                       style={{
-                        backgroundColor: 'rgba(255, 0, 255, 0.15)',
-                        border: '1px solid rgba(255, 0, 255, 0.5)',
-                        color: '#FF00FF'
+                        backgroundColor: 'rgba(233, 69, 96, 0.15)',
+                        border: '1px solid rgba(233, 69, 96, 0.5)',
+                        color: '#E94560'
                       }}
                     >
                       <FaEdit className="text-xs" />
@@ -619,16 +619,16 @@ export default function Profile() {
               <motion.button
                 onClick={handleChallenge}
                 disabled={challenging}
-                whileHover={{ scale: 1.05, boxShadow: '0 0 15px rgba(57, 255, 20, 0.4)' }}
+                whileHover={{ scale: 1.05, boxShadow: '0 0 15px rgba(78, 204, 163, 0.4)' }}
                 whileTap={{ scale: 0.95 }}
                 className="flex-shrink-0 inline-flex items-center space-x-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm uppercase tracking-wider transition-all"
                 style={{
-                  backgroundColor: challenging ? 'rgba(57, 255, 20, 0.3)' : 'rgba(57, 255, 20, 0.2)',
-                  border: '2px solid #39FF14',
-                  color: '#39FF14',
+                  backgroundColor: challenging ? 'rgba(78, 204, 163, 0.3)' : 'rgba(78, 204, 163, 0.2)',
+                  border: '2px solid #4ECCA3',
+                  color: '#4ECCA3',
                   cursor: challenging ? 'not-allowed' : 'pointer',
                   opacity: challenging ? 0.7 : 1,
-                  boxShadow: challenging ? 'none' : '0 2px 10px rgba(57, 255, 20, 0.25)'
+                  boxShadow: challenging ? 'none' : '0 2px 10px rgba(78, 204, 163, 0.25)'
                 }}
               >
                 {challenging ? (
@@ -651,9 +651,9 @@ export default function Profile() {
           <div className="mb-4 sm:mb-6 flex items-center justify-center">
             <div className="rounded-lg p-4 sm:p-5 text-center border-2" style={{
               backgroundColor: 'rgba(255, 69, 0, 0.15)',
-              borderColor: '#FF4500'
+              borderColor: '#FF6B6B'
             }}>
-              <div className="text-2xl sm:text-3xl font-black mb-1 flex items-center justify-center space-x-2" style={{ color: '#FF4500' }}>
+              <div className="text-2xl sm:text-3xl font-black mb-1 flex items-center justify-center space-x-2" style={{ color: '#FF6B6B' }}>
                 <FaFire className="text-xl sm:text-2xl" />
                 <span>{stats.win_streak}</span>
               </div>
@@ -664,39 +664,39 @@ export default function Profile() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
           <div className="rounded-lg p-4 sm:p-5 text-center border-2" style={{
-            backgroundColor: 'rgba(57, 255, 20, 0.15)',
-            borderColor: '#39FF14'
+            backgroundColor: 'rgba(78, 204, 163, 0.15)',
+            borderColor: '#4ECCA3'
           }}>
-            <div className="text-2xl sm:text-3xl font-black mb-1" style={{ color: '#39FF14' }}>{stats.wins}</div>
-            <div className="text-xs sm:text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(57, 255, 20, 0.9)' }}>Wins</div>
+            <div className="text-2xl sm:text-3xl font-black mb-1" style={{ color: '#4ECCA3' }}>{stats.wins}</div>
+            <div className="text-xs sm:text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(78, 204, 163, 0.9)' }}>Wins</div>
           </div>
           <div className="rounded-lg p-4 sm:p-5 text-center border-2" style={{
-            backgroundColor: 'rgba(191, 26, 26, 0.15)',
-            borderColor: '#BF1A1A'
+            backgroundColor: 'rgba(255, 107, 107, 0.15)',
+            borderColor: '#FF6B6B'
           }}>
-            <div className="text-2xl sm:text-3xl font-black mb-1" style={{ color: '#BF1A1A' }}>{stats.losses}</div>
-            <div className="text-xs sm:text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(191, 26, 26, 0.9)' }}>Losses</div>
+            <div className="text-2xl sm:text-3xl font-black mb-1" style={{ color: '#FF6B6B' }}>{stats.losses}</div>
+            <div className="text-xs sm:text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(255, 107, 107, 0.9)' }}>Losses</div>
           </div>
           <div className="rounded-lg p-4 sm:p-5 text-center border-2" style={{
-            backgroundColor: 'rgba(255, 215, 0, 0.15)',
-            borderColor: '#FFD700'
+            backgroundColor: 'rgba(244, 209, 96, 0.15)',
+            borderColor: '#F4D160'
           }}>
-            <div className="text-2xl sm:text-3xl font-black mb-1" style={{ color: '#FFD700' }}>{stats.draws}</div>
-            <div className="text-xs sm:text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(255, 215, 0, 0.9)' }}>Draws</div>
+            <div className="text-2xl sm:text-3xl font-black mb-1" style={{ color: '#F4D160' }}>{stats.draws}</div>
+            <div className="text-xs sm:text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(244, 209, 96, 0.9)' }}>Draws</div>
           </div>
           <div className="rounded-lg p-4 sm:p-5 text-center border-2" style={{
-            backgroundColor: 'rgba(255, 0, 255, 0.15)',
-            borderColor: '#FF00FF'
+            backgroundColor: 'rgba(233, 69, 96, 0.15)',
+            borderColor: '#E94560'
           }}>
-            <div className="text-2xl sm:text-3xl font-black mb-1" style={{ color: '#FF00FF' }}>{stats.total_games}</div>
-            <div className="text-xs sm:text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(255, 0, 255, 0.9)' }}>Total</div>
+            <div className="text-2xl sm:text-3xl font-black mb-1" style={{ color: '#E94560' }}>{stats.total_games}</div>
+            <div className="text-xs sm:text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(233, 69, 96, 0.9)' }}>Total</div>
           </div>
         </div>
 
         <div className="mt-6 sm:mt-8">
           <div className="flex justify-between items-center mb-2 sm:mb-3">
-            <span className="text-sm sm:text-base font-semibold uppercase tracking-wider" style={{ color: 'rgba(242, 174, 187, 0.9)' }}>Win Rate</span>
-            <span className="text-lg sm:text-xl font-black" style={{ color: 'rgb(242, 174, 187)' }}>{winRate}%</span>
+            <span className="text-sm sm:text-base font-semibold uppercase tracking-wider" style={{ color: 'rgba(234, 234, 234, 0.9)' }}>Win Rate</span>
+            <span className="text-lg sm:text-xl font-black" style={{ color: '#EAEAEA' }}>{winRate}%</span>
           </div>
           <div className="w-full rounded-full h-3 sm:h-4" style={{ backgroundColor: 'rgba(242, 174, 187, 0.2)' }}>
             <motion.div
@@ -704,7 +704,7 @@ export default function Profile() {
               animate={{ width: `${winRate}%` }}
               transition={{ duration: 1, ease: "easeOut" }}
               className="h-3 sm:h-4 rounded-full"
-              style={{ backgroundColor: '#FF00FF' }}
+              style={{ backgroundColor: '#E94560' }}
             />
           </div>
         </div>
@@ -716,12 +716,12 @@ export default function Profile() {
         transition={{ delay: 0.2 }}
         className="card"
       >
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-black mb-4 sm:mb-6 uppercase tracking-wider flex items-center space-x-3" style={{ color: 'rgb(242, 174, 187)' }}>
-          <FaChartLine style={{ color: '#FF00FF' }} className="text-xl sm:text-2xl" />
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-black mb-4 sm:mb-6 uppercase tracking-wider flex items-center space-x-3" style={{ color: '#EAEAEA' }}>
+          <FaChartLine style={{ color: '#E94560' }} className="text-xl sm:text-2xl" />
           <span>Recent Games</span>
         </h2>
         {recentGames.length === 0 ? (
-          <p className="text-center py-8 sm:py-12 text-sm sm:text-base" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>No games played yet</p>
+          <p className="text-center py-8 sm:py-12 text-sm sm:text-base" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>No games played yet</p>
         ) : (
           <div className="space-y-3 sm:space-y-4">
             {recentGames.map((game) => {
@@ -757,24 +757,24 @@ export default function Profile() {
                   className="p-4 sm:p-5 rounded-lg border-2 cursor-pointer transition-all"
                   style={{
                     backgroundColor: isWinner 
-                      ? 'rgba(57, 255, 20, 0.15)' 
+                      ? 'rgba(78, 204, 163, 0.15)' 
                       : isDraw 
-                      ? 'rgba(255, 215, 0, 0.15)' 
-                      : 'rgba(191, 26, 26, 0.15)',
+                      ? 'rgba(244, 209, 96, 0.15)' 
+                      : 'rgba(255, 107, 107, 0.15)',
                     borderColor: isWinner 
-                      ? '#39FF14' 
+                      ? '#4ECCA3' 
                       : isDraw 
-                      ? '#FFD700' 
-                      : '#BF1A1A'
+                      ? '#F4D160' 
+                      : '#FF6B6B'
                   }}
                 >
                   <div className="flex flex-row justify-between items-center">
                     <div className="flex-1">
                       <div className="text-base sm:text-lg font-black uppercase tracking-wider mb-1 flex items-center space-x-2">
-                        <span style={{ color: 'rgba(242, 174, 187, 0.6)' }}>vs</span>
-                        <span style={{ color: 'rgb(242, 174, 187)' }}>{game.opponentUsername || 'Unknown'}</span>
+                        <span style={{ color: 'rgba(234, 234, 234, 0.6)' }}>vs</span>
+                        <span style={{ color: '#EAEAEA' }}>{game.opponentUsername || 'Unknown'}</span>
                       </div>
-                      <div className="text-xs sm:text-sm" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>
+                      <div className="text-xs sm:text-sm" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>
                         {new Date(game.created_at).toLocaleDateString('en-US', { 
                           year: 'numeric', 
                           month: 'short', 
@@ -787,18 +787,18 @@ export default function Profile() {
                     <div className="ml-4 flex-shrink-0">
                       {isWinner ? (
                         <span className="text-base sm:text-lg font-black uppercase tracking-wider px-3 py-1 rounded" style={{ 
-                          color: '#39FF14',
-                          backgroundColor: 'rgba(57, 255, 20, 0.2)'
+                          color: '#4ECCA3',
+                          backgroundColor: 'rgba(78, 204, 163, 0.2)'
                         }}>Win</span>
                       ) : isDraw ? (
                         <span className="text-base sm:text-lg font-black uppercase tracking-wider px-3 py-1 rounded" style={{ 
-                          color: '#FFD700',
-                          backgroundColor: 'rgba(255, 215, 0, 0.2)'
+                          color: '#F4D160',
+                          backgroundColor: 'rgba(244, 209, 96, 0.2)'
                         }}>Draw</span>
                       ) : (
                         <span className="text-base sm:text-lg font-black uppercase tracking-wider px-3 py-1 rounded" style={{ 
-                          color: '#BF1A1A',
-                          backgroundColor: 'rgba(191, 26, 26, 0.2)'
+                          color: '#FF6B6B',
+                          backgroundColor: 'rgba(255, 107, 107, 0.2)'
                         }}>Loss</span>
                       )}
                     </div>
@@ -830,11 +830,11 @@ export default function Profile() {
             >
               <div className="flex justify-between items-start mb-4">
                 <div className="flex-1">
-                  <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-wider mb-2" style={{ color: 'rgb(242, 174, 187)' }}>
+                  <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-wider mb-2" style={{ color: '#EAEAEA' }}>
                     Game Details
                   </h2>
                   {selectedGame.created_at && (
-                    <p className="text-sm sm:text-base mb-2" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>
+                    <p className="text-sm sm:text-base mb-2" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>
                       {new Date(selectedGame.created_at).toLocaleDateString('en-US', { 
                         year: 'numeric', 
                         month: 'long', 
@@ -850,12 +850,12 @@ export default function Profile() {
                       animate={{ scale: 1 }}
                       className="inline-flex items-center space-x-2 px-3 py-1 rounded"
                       style={{
-                        backgroundColor: 'rgba(57, 255, 20, 0.2)',
-                        border: '2px solid #39FF14'
+                        backgroundColor: 'rgba(78, 204, 163, 0.2)',
+                        border: '2px solid #4ECCA3'
                       }}
                     >
-                      <FaTrophy style={{ color: '#39FF14' }} />
-                      <span className="text-sm sm:text-base font-black uppercase tracking-wider" style={{ color: '#39FF14' }}>
+                      <FaTrophy style={{ color: '#4ECCA3' }} />
+                      <span className="text-sm sm:text-base font-black uppercase tracking-wider" style={{ color: '#4ECCA3' }}>
                         {winnerUsername || selectedGame.player1_username || selectedGame.player2_username || 'Unknown'} Won!
                       </span>
                     </motion.div>
@@ -866,12 +866,12 @@ export default function Profile() {
                       animate={{ scale: 1 }}
                       className="inline-flex items-center space-x-2 px-3 py-1 rounded"
                       style={{
-                        backgroundColor: 'rgba(255, 215, 0, 0.2)',
-                        border: '2px solid #FFD700'
+                        backgroundColor: 'rgba(244, 209, 96, 0.2)',
+                        border: '2px solid #F4D160'
                       }}
                     >
-                      <FaHandshake style={{ color: '#FFD700' }} />
-                      <span className="text-sm sm:text-base font-black uppercase tracking-wider" style={{ color: '#FFD700' }}>
+                      <FaHandshake style={{ color: '#F4D160' }} />
+                      <span className="text-sm sm:text-base font-black uppercase tracking-wider" style={{ color: '#F4D160' }}>
                         Draw
                       </span>
                     </motion.div>
@@ -882,7 +882,7 @@ export default function Profile() {
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setSelectedGame(null)}
                   className="p-2 rounded-full"
-                  style={{ color: '#BF1A1A' }}
+                  style={{ color: '#FF6B6B' }}
                 >
                   <FaTimes className="text-2xl" />
                 </motion.button>
@@ -902,7 +902,7 @@ export default function Profile() {
                   currentUserId={user?.uid}
                 />
               ) : (
-                <p className="text-center py-8" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>
+                <p className="text-center py-8" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>
                   No rounds played in this game
                 </p>
               )}
@@ -930,7 +930,7 @@ export default function Profile() {
               className="card max-w-md md:max-w-2xl lg:max-w-3xl w-full"
             >
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>
+                <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-wider" style={{ color: '#EAEAEA' }}>
                   Choose Your Avatar
                 </h2>
                 <motion.button
@@ -938,7 +938,7 @@ export default function Profile() {
                   whileTap={{ scale: 0.9 }}
                   onClick={() => !savingAvatar && setShowAvatarSelector(false)}
                   className="p-2 rounded-full"
-                  style={{ color: '#BF1A1A' }}
+                  style={{ color: '#FF6B6B' }}
                   disabled={savingAvatar}
                 >
                   <FaTimes className="text-2xl" />
@@ -961,18 +961,18 @@ export default function Profile() {
                       }`}
                       style={{
                         backgroundColor: isSelected 
-                          ? 'rgba(255, 0, 255, 0.3)' 
-                          : 'rgba(255, 0, 255, 0.15)',
-                        borderColor: isSelected ? '#FF00FF' : 'rgba(255, 0, 255, 0.5)',
-                        ringColor: '#FF00FF',
-                        ringOffsetColor: '#1a1a2e',
+                          ? 'rgba(233, 69, 96, 0.3)' 
+                          : 'rgba(233, 69, 96, 0.15)',
+                        borderColor: isSelected ? '#E94560' : 'rgba(233, 69, 96, 0.5)',
+                        ringColor: '#E94560',
+                        ringOffsetColor: '#1A1A2E',
                         opacity: savingAvatar ? 0.5 : 1,
                         cursor: savingAvatar ? 'not-allowed' : 'pointer'
                       }}
                       title={avatar.name}
                     >
                       <IconComponent 
-                        style={{ color: avatar.color || '#FF00FF' }} 
+                        style={{ color: avatar.color || '#E94560' }} 
                         className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl"
                         aria-label={avatar.name}
                       />
@@ -983,7 +983,7 @@ export default function Profile() {
 
               {savingAvatar && (
                 <div className="mt-6 text-center">
-                  <p className="text-sm" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>
+                  <p className="text-sm" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>
                     Saving...
                   </p>
                 </div>
@@ -1015,10 +1015,10 @@ export default function Profile() {
               className="card max-w-md w-full"
             >
               <div className="text-center mb-6">
-                <h2 className="text-2xl sm:text-3xl font-black mb-4 uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>
+                <h2 className="text-2xl sm:text-3xl font-black mb-4 uppercase tracking-wider" style={{ color: '#EAEAEA' }}>
                   {timeoutMessage.includes('denied') ? 'Challenge Denied' : 'Challenge Timeout'}
                 </h2>
-                <p className="text-sm sm:text-base mb-6" style={{ color: 'rgba(242, 174, 187, 0.8)' }}>
+                <p className="text-sm sm:text-base mb-6" style={{ color: 'rgba(234, 234, 234, 0.8)' }}>
                   {timeoutMessage}
                 </p>
                 <motion.button
@@ -1030,10 +1030,10 @@ export default function Profile() {
                   whileTap={{ scale: 0.95 }}
                   className="w-full flex items-center justify-center space-x-2 py-3 rounded-lg font-bold text-sm sm:text-base uppercase tracking-wider transition-all"
                   style={{
-                    backgroundColor: 'rgba(255, 0, 255, 0.2)',
-                    border: '2px solid #FF00FF',
-                    color: '#FF00FF',
-                    boxShadow: '0 2px 10px rgba(255, 0, 255, 0.25)'
+                    backgroundColor: 'rgba(233, 69, 96, 0.2)',
+                    border: '2px solid #E94560',
+                    color: '#E94560',
+                    boxShadow: '0 2px 10px rgba(233, 69, 96, 0.25)'
                   }}
                 >
                   <span>OK</span>
@@ -1130,7 +1130,7 @@ function GameRoundViewer({ game, currentRoundIndex, setCurrentRoundIndex, showCh
   if (!currentRound) {
     return (
       <div className="text-center py-8">
-        <p style={{ color: 'rgb(242, 174, 187)' }}>All rounds completed!</p>
+        <p style={{ color: '#EAEAEA' }}>All rounds completed!</p>
       </div>
     )
   }
@@ -1157,7 +1157,7 @@ function GameRoundViewer({ game, currentRoundIndex, setCurrentRoundIndex, showCh
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
-        <h3 className="text-xl sm:text-2xl font-black uppercase tracking-wider mb-4" style={{ color: 'rgb(242, 174, 187)' }}>
+        <h3 className="text-xl sm:text-2xl font-black uppercase tracking-wider mb-4" style={{ color: '#EAEAEA' }}>
           Round {currentRoundIndex + 1} of {rounds.length}
         </h3>
         <div className="flex justify-center items-center space-x-3 sm:space-x-4">
@@ -1192,33 +1192,33 @@ function GameRoundViewer({ game, currentRoundIndex, setCurrentRoundIndex, showCh
                 }`}
                 style={{
                   backgroundColor: userResult === 'win'
-                    ? 'rgba(57, 255, 20, 0.2)'
+                    ? 'rgba(78, 204, 163, 0.2)'
                     : userResult === 'loss'
-                    ? 'rgba(191, 26, 26, 0.2)'
+                    ? 'rgba(255, 107, 107, 0.2)'
                     : userResult === 'draw'
-                    ? 'rgba(255, 215, 0, 0.2)'
-                    : 'rgba(242, 174, 187, 0.1)',
+                    ? 'rgba(244, 209, 96, 0.2)'
+                    : 'rgba(233, 69, 96, 0.1)',
                   borderColor: idx === currentRoundIndex
-                    ? '#FF00FF'
+                    ? '#E94560'
                     : userResult === 'win'
-                    ? '#39FF14'
+                    ? '#4ECCA3'
                     : userResult === 'loss'
-                    ? '#BF1A1A'
+                    ? '#FF6B6B'
                     : userResult === 'draw'
-                    ? '#FFD700'
+                    ? '#F4D160'
                     : 'rgba(242, 174, 187, 0.3)',
-                  ringColor: '#FF00FF',
-                  ringOffsetColor: '#1a1a2e'
+                  ringColor: '#E94560',
+                  ringOffsetColor: '#1A1A2E'
                 }}
               >
                 {userResult === 'win' ? (
-                  <FaThumbsUp style={{ color: '#39FF14' }} className="text-lg sm:text-xl" />
+                  <FaThumbsUp style={{ color: '#4ECCA3' }} className="text-lg sm:text-xl" />
                 ) : userResult === 'loss' ? (
-                  <FaThumbsDown style={{ color: '#BF1A1A' }} className="text-lg sm:text-xl" />
+                  <FaThumbsDown style={{ color: '#FF6B6B' }} className="text-lg sm:text-xl" />
                 ) : userResult === 'draw' ? (
-                  <FaHandshake style={{ color: '#FFD700' }} className="text-lg sm:text-xl" />
+                  <FaHandshake style={{ color: '#F4D160' }} className="text-lg sm:text-xl" />
                 ) : (
-                  <span style={{ color: 'rgba(242, 174, 187, 0.7)' }} className="text-sm sm:text-base font-bold">
+                  <span style={{ color: 'rgba(234, 234, 234, 0.7)' }} className="text-sm sm:text-base font-bold">
                     {idx + 1}
                   </span>
                 )}
@@ -1238,7 +1238,7 @@ function GameRoundViewer({ game, currentRoundIndex, setCurrentRoundIndex, showCh
           transition={{ duration: 0.2 }}
           className="text-center flex flex-col items-center"
         >
-          <div className="mb-2 text-sm" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>
+          <div className="mb-2 text-sm" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>
             {player1Username}
           </div>
           {showChoices && player1Choice ? (
@@ -1258,7 +1258,7 @@ function GameRoundViewer({ game, currentRoundIndex, setCurrentRoundIndex, showCh
           ) : (
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center border-2" style={{
               borderColor: 'rgba(242, 174, 187, 0.3)',
-              backgroundColor: 'rgba(242, 174, 187, 0.1)'
+              backgroundColor: 'rgba(233, 69, 96, 0.1)'
             }}>
               <FaHandRock className="text-3xl" style={{ color: 'rgba(242, 174, 187, 0.3)' }} />
             </div>
@@ -1268,7 +1268,7 @@ function GameRoundViewer({ game, currentRoundIndex, setCurrentRoundIndex, showCh
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="text-2xl sm:text-3xl font-bold" style={{ color: '#00F5FF' }}
+          className="text-2xl sm:text-3xl font-bold" style={{ color: '#E94560' }}
         >
           VS
         </motion.div>
@@ -1282,7 +1282,7 @@ function GameRoundViewer({ game, currentRoundIndex, setCurrentRoundIndex, showCh
           transition={{ duration: 0.2 }}
           className="text-center flex flex-col items-center"
         >
-          <div className="mb-2 text-sm" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>
+          <div className="mb-2 text-sm" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>
             {player2Username}
           </div>
           {showChoices && player2Choice ? (
@@ -1302,7 +1302,7 @@ function GameRoundViewer({ game, currentRoundIndex, setCurrentRoundIndex, showCh
           ) : (
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center border-2" style={{
               borderColor: 'rgba(242, 174, 187, 0.3)',
-              backgroundColor: 'rgba(242, 174, 187, 0.1)'
+              backgroundColor: 'rgba(233, 69, 96, 0.1)'
             }}>
               <FaHandRock className="text-3xl" style={{ color: 'rgba(242, 174, 187, 0.3)' }} />
             </div>
@@ -1318,8 +1318,8 @@ function GameRoundViewer({ game, currentRoundIndex, setCurrentRoundIndex, showCh
             userWon ? 'bg-green-500/20' : isDraw ? 'bg-yellow-500/20' : 'bg-red-500/20'
           }`}
           style={{
-            border: `2px solid ${userWon ? '#39FF14' : isDraw ? '#FFD700' : '#BF1A1A'}`,
-            color: userWon ? '#39FF14' : isDraw ? '#FFD700' : '#BF1A1A'
+            border: `2px solid ${userWon ? '#4ECCA3' : isDraw ? '#F4D160' : '#FF6B6B'}`,
+            color: userWon ? '#4ECCA3' : isDraw ? '#F4D160' : '#FF6B6B'
           }}
         >
           {isDraw ? (

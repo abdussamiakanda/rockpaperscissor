@@ -8,9 +8,9 @@ import { FaHandRock, FaHandPaper, FaHandScissors, FaCheck, FaSpinner, FaTrophy, 
 import LoadingSpinner from '../components/LoadingSpinner'
 
 const CHOICES = {
-  rock: { icon: FaHandRock, name: 'Rock', beats: 'scissors', color: 'text-brand-danger', hexColor: '#FFD700' }, // Gold
-  paper: { icon: FaHandPaper, name: 'Paper', beats: 'rock', color: 'text-brand-accent', hexColor: '#FF00FF' }, // Pink
-  scissors: { icon: FaHandScissors, name: 'Scissors', beats: 'paper', color: 'text-brand-neon', hexColor: '#39FF14' }, // Neon Green
+  rock: { icon: FaHandRock, name: 'Rock', beats: 'scissors', color: 'text-brand-danger', hexColor: '#F4D160' }, // Gold
+  paper: { icon: FaHandPaper, name: 'Paper', beats: 'rock', color: 'text-brand-accent', hexColor: '#E94560' }, // Pink
+  scissors: { icon: FaHandScissors, name: 'Scissors', beats: 'paper', color: 'text-brand-neon', hexColor: '#4ECCA3' }, // Neon Green
 }
 
 export default function Game() {
@@ -522,7 +522,7 @@ export default function Game() {
   if (!game) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)]">
-        <div className="text-xl mb-4" style={{ color: 'rgb(242, 174, 187)' }}>No active game found</div>
+        <div className="text-xl mb-4" style={{ color: '#EAEAEA' }}>No active game found</div>
         <button onClick={() => navigate('/dashboard')} className="btn-primary">
           Go to Dashboard
         </button>
@@ -562,9 +562,9 @@ export default function Game() {
             transition={{ repeat: Infinity, duration: 2 }}
             className="mb-6"
           >
-            <FaSpinner className="animate-spin text-4xl sm:text-5xl mx-auto mb-4" style={{ color: '#FF00FF' }} />
-            <h2 className="text-2xl sm:text-3xl font-black mb-2 uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>Waiting for opponent...</h2>
-            <p className="text-sm sm:text-base" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>
+            <FaSpinner className="animate-spin text-4xl sm:text-5xl mx-auto mb-4" style={{ color: '#E94560' }} />
+            <h2 className="text-2xl sm:text-3xl font-black mb-2 uppercase tracking-wider" style={{ color: '#EAEAEA' }}>Waiting for opponent...</h2>
+            <p className="text-sm sm:text-base" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>
               {challengedPlayer 
                 ? `Waiting for ${challengedPlayer} to join...`
                 : 'Looking for someone to play with'}
@@ -576,9 +576,9 @@ export default function Game() {
             whileTap={{ scale: 0.95 }}
             className="w-full flex items-center justify-center space-x-2 font-black uppercase tracking-wider py-3 sm:py-4 rounded-lg border-2 transition-all"
             style={{
-              backgroundColor: 'rgba(191, 26, 26, 0.2)',
-              color: '#BF1A1A',
-              borderColor: '#BF1A1A',
+              backgroundColor: 'rgba(255, 107, 107, 0.2)',
+              color: '#FF6B6B',
+              borderColor: '#FF6B6B',
             }}
           >
             <FaTimes />
@@ -594,18 +594,18 @@ export default function Game() {
       <div className="card mb-6">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-4 space-y-4 sm:space-y-0">
           <div className="text-center flex-1">
-            <div className="text-base sm:text-lg font-black uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>{player1?.username || 'Player 1'}</div>
-            <div className="text-xs sm:text-sm font-semibold" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>
+            <div className="text-base sm:text-lg font-black uppercase tracking-wider" style={{ color: '#EAEAEA' }}>{player1?.username || 'Player 1'}</div>
+            <div className="text-xs sm:text-sm font-semibold" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>
               {turnResults.filter((r) => (typeof r === 'string' ? r : r.result) === 'player1').length} wins
             </div>
           </div>
           <div className="text-center">
-            <div className="text-xl sm:text-2xl font-black uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>VS</div>
-            <div className="text-xs sm:text-sm font-semibold" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>Turn {game.current_turn}/3</div>
+            <div className="text-xl sm:text-2xl font-black uppercase tracking-wider" style={{ color: '#EAEAEA' }}>VS</div>
+            <div className="text-xs sm:text-sm font-semibold" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>Turn {game.current_turn}/3</div>
           </div>
           <div className="text-center flex-1">
-            <div className="text-base sm:text-lg font-black uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>{player2?.username || 'Player 2'}</div>
-            <div className="text-xs sm:text-sm font-semibold" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>
+            <div className="text-base sm:text-lg font-black uppercase tracking-wider" style={{ color: '#EAEAEA' }}>{player2?.username || 'Player 2'}</div>
+            <div className="text-xs sm:text-sm font-semibold" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>
               {turnResults.filter((r) => (typeof r === 'string' ? r : r.result) === 'player2').length} wins
             </div>
           </div>
@@ -652,26 +652,26 @@ export default function Game() {
                 }`}
                 style={{
                   backgroundColor: userResult === 'win'
-                    ? 'rgba(255, 0, 255, 0.2)'
+                    ? 'rgba(233, 69, 96, 0.2)'
                     : userResult === 'loss'
-                    ? 'rgba(255, 215, 0, 0.2)'
+                    ? 'rgba(244, 209, 96, 0.2)'
                     : userResult === 'draw'
-                    ? 'rgba(0, 245, 255, 0.2)'
+                    ? 'rgba(233, 69, 96, 0.2)'
                     : isCurrentTurn
-                    ? 'rgba(255, 0, 255, 0.1)'
-                    : 'rgba(0, 245, 255, 0.05)'
+                    ? 'rgba(233, 69, 96, 0.1)'
+                    : 'rgba(233, 69, 96, 0.05)'
                 }}
               >
                 {userResult ? (
                   userResult === 'win' ? (
-                    <FaThumbsUp style={{ color: '#FF00FF' }} />
+                    <FaThumbsUp style={{ color: '#E94560' }} />
                   ) : userResult === 'loss' ? (
-                    <FaThumbsDown style={{ color: '#FFD700' }} />
+                    <FaThumbsDown style={{ color: '#F4D160' }} />
                   ) : (
-                    <FaHandshake style={{ color: '#00F5FF' }} />
+                    <FaHandshake style={{ color: '#E94560' }} />
                   )
                 ) : (
-                  <span style={{ color: 'rgba(242, 174, 187, 0.7)' }}>{turnNum}</span>
+                  <span style={{ color: 'rgba(234, 234, 234, 0.7)' }}>{turnNum}</span>
                 )}
               </motion.div>
             )
@@ -686,9 +686,9 @@ export default function Game() {
           className="card text-center"
         >
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-3 mb-4 sm:mb-6">
-            {winner === 'You' && <FaTrophy style={{ color: '#FFD700' }} className="text-3xl sm:text-4xl md:text-5xl" />}
-            {winner === 'Draw' && <FaHandshake style={{ color: '#00F5FF' }} className="text-3xl sm:text-4xl md:text-5xl" />}
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-wider text-center" style={{ color: 'rgb(242, 174, 187)' }}>
+            {winner === 'You' && <FaTrophy style={{ color: '#F4D160' }} className="text-3xl sm:text-4xl md:text-5xl" />}
+            {winner === 'Draw' && <FaHandshake style={{ color: '#E94560' }} className="text-3xl sm:text-4xl md:text-5xl" />}
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-wider text-center" style={{ color: '#EAEAEA' }}>
               {gameAbandoned 
                 ? (userAbandoned ? 'You Abandoned!' : 'Game Abandoned!')
                 : winner === 'You' 
@@ -697,10 +697,10 @@ export default function Game() {
                 ? "It's a Draw!" 
                 : `${winner} Wins!`}
             </h2>
-            {winner === 'You' && <FaTrophy style={{ color: '#FFD700' }} className="text-3xl sm:text-4xl md:text-5xl" />}
+            {winner === 'You' && <FaTrophy style={{ color: '#F4D160' }} className="text-3xl sm:text-4xl md:text-5xl" />}
           </div>
           {gameAbandoned && (
-            <p className="text-base sm:text-lg mb-4 sm:mb-6" style={{ color: 'rgba(242, 174, 187, 0.8)' }}>
+            <p className="text-base sm:text-lg mb-4 sm:mb-6" style={{ color: 'rgba(234, 234, 234, 0.8)' }}>
               {userAbandoned 
                 ? 'You did not make a choice in time.' 
                 : 'Your opponent did not make a choice in time.'}
@@ -753,7 +753,7 @@ export default function Game() {
               animate={{ opacity: 1, y: 0 }}
               className="card text-center mb-6"
             >
-              <h3 className="text-xl sm:text-2xl md:text-3xl font-black mb-4 sm:mb-6 uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>Round {game.current_turn} Results</h3>
+              <h3 className="text-xl sm:text-2xl md:text-3xl font-black mb-4 sm:mb-6 uppercase tracking-wider" style={{ color: '#EAEAEA' }}>Round {game.current_turn} Results</h3>
               <div className="flex justify-around items-center mb-4 sm:mb-6">
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
@@ -761,7 +761,7 @@ export default function Game() {
                   transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
                   className="text-center flex flex-col items-center"
                 >
-                  <div className="mb-2 text-xs sm:text-sm" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>{player1?.username || 'Player 1'}</div>
+                  <div className="mb-2 text-xs sm:text-sm" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>{player1?.username || 'Player 1'}</div>
                   <div className="flex justify-center items-center">
                     {React.createElement(CHOICES[player1Choice].icon, {
                       className: `text-4xl sm:text-5xl md:text-6xl lg:text-7xl ${CHOICES[player1Choice].color}`,
@@ -774,7 +774,7 @@ export default function Game() {
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.5 }}
-                  className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-center" style={{ color: '#00F5FF' }}
+                  className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-center" style={{ color: '#E94560' }}
                 >
                   VS
                 </motion.div>
@@ -784,7 +784,7 @@ export default function Game() {
                   transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
                   className="text-center flex flex-col items-center"
                 >
-                  <div className="mb-2 text-xs sm:text-sm" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>{player2?.username || 'Player 2'}</div>
+                  <div className="mb-2 text-xs sm:text-sm" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>{player2?.username || 'Player 2'}</div>
                   <div className="flex justify-center items-center">
                     {React.createElement(CHOICES[player2Choice].icon, {
                       className: `text-4xl sm:text-5xl md:text-6xl lg:text-7xl ${CHOICES[player2Choice].color}`,
@@ -807,26 +807,26 @@ export default function Game() {
                 }`}
                 style={{
                   color: turnResults.length > 0 && (typeof turnResults[turnResults.length - 1] === 'string' ? turnResults[turnResults.length - 1] : turnResults[turnResults.length - 1].result) === 'player1'
-                    ? '#FF00FF'
+                    ? '#E94560'
                     : turnResults.length > 0 && (typeof turnResults[turnResults.length - 1] === 'string' ? turnResults[turnResults.length - 1] : turnResults[turnResults.length - 1].result) === 'player2'
-                    ? '#FFD700'
-                    : '#00F5FF'
+                    ? '#F4D160'
+                    : '#E94560'
                 }}
               >
                 {turnResults.length > 0 &&
                   ((typeof turnResults[turnResults.length - 1] === 'string' ? turnResults[turnResults.length - 1] : turnResults[turnResults.length - 1].result) === 'player1' ? (
                     <div className="flex items-center justify-center space-x-2 flex-wrap">
-                      <FaTrophy className="text-lg sm:text-xl md:text-2xl" style={{ color: '#39FF14' }} />
+                      <FaTrophy className="text-lg sm:text-xl md:text-2xl" style={{ color: '#4ECCA3' }} />
                       <span className="text-center">{player1?.username || 'Player 1'} wins this round!</span>
                     </div>
                   ) : (typeof turnResults[turnResults.length - 1] === 'string' ? turnResults[turnResults.length - 1] : turnResults[turnResults.length - 1].result) === 'player2' ? (
                     <div className="flex items-center justify-center space-x-2 flex-wrap">
-                      <FaTrophy className="text-lg sm:text-xl md:text-2xl" style={{ color: '#39FF14' }} />
+                      <FaTrophy className="text-lg sm:text-xl md:text-2xl" style={{ color: '#4ECCA3' }} />
                       <span className="text-center">{player2?.username || 'Player 2'} wins this round!</span>
                     </div>
                   ) : (
                     <div className="flex items-center justify-center space-x-2 flex-wrap">
-                      <FaHandshake className="text-lg sm:text-xl md:text-2xl" style={{ color: '#FFD700' }} />
+                      <FaHandshake className="text-lg sm:text-xl md:text-2xl" style={{ color: '#F4D160' }} />
                       <span className="text-center">It's a draw!</span>
                     </div>
                   ))}
@@ -834,13 +834,13 @@ export default function Game() {
             </motion.div>
           ) : (
             <div className="card mb-6">
-              <h3 className="text-xl sm:text-2xl md:text-3xl font-black mb-4 text-center uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>Make Your Choice</h3>
+              <h3 className="text-xl sm:text-2xl md:text-3xl font-black mb-4 text-center uppercase tracking-wider" style={{ color: '#EAEAEA' }}>Make Your Choice</h3>
               {waitingForOpponent && (
                 <motion.div
                   animate={{ opacity: [0.5, 1, 0.5] }}
                   transition={{ repeat: Infinity, duration: 1.5 }}
                   className="flex items-center justify-center space-x-2 mb-4 font-semibold"
-                  style={{ color: '#FF00FF' }}
+                  style={{ color: '#E94560' }}
                 >
                   <FaSpinner className="animate-spin" />
                   <span>Waiting for opponent...</span>
@@ -851,7 +851,7 @@ export default function Game() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className="flex items-center justify-center space-x-2 mb-4 font-semibold"
-                  style={{ color: '#39FF14' }}
+                  style={{ color: '#4ECCA3' }}
                 >
                   <FaCheck />
                   <span>Choice locked in!</span>
@@ -877,25 +877,25 @@ export default function Game() {
                       }`}
                       style={{
                         backgroundColor: isSelected
-                          ? 'rgba(255, 0, 255, 0.2)'
+                          ? 'rgba(233, 69, 96, 0.2)'
                           : canPlay && !selectedChoice
                           ? 'rgba(10, 10, 15, 0.7)'
                           : 'rgba(10, 10, 15, 0.5)',
                         borderColor: isSelected
-                          ? '#FF00FF'
+                          ? '#E94560'
                           : canPlay && !selectedChoice
-                          ? 'rgba(255, 0, 255, 0.5)'
-                          : 'rgba(255, 0, 255, 0.3)'
+                          ? 'rgba(233, 69, 96, 0.5)'
+                          : 'rgba(233, 69, 96, 0.3)'
                       }}
                       onMouseEnter={(e) => {
                         if (canPlay && !selectedChoice && !isSelected) {
-                          e.currentTarget.style.borderColor = '#FF00FF'
+                          e.currentTarget.style.borderColor = '#E94560'
                           e.currentTarget.style.backgroundColor = 'rgba(10, 10, 15, 0.8)'
                         }
                       }}
                       onMouseLeave={(e) => {
                         if (canPlay && !selectedChoice && !isSelected) {
-                          e.currentTarget.style.borderColor = 'rgba(255, 0, 255, 0.5)'
+                          e.currentTarget.style.borderColor = 'rgba(233, 69, 96, 0.5)'
                           e.currentTarget.style.backgroundColor = 'rgba(10, 10, 15, 0.7)'
                         }
                       }}
@@ -905,7 +905,7 @@ export default function Game() {
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 rounded-full w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center"
-                          style={{ backgroundColor: '#39FF14' }}
+                          style={{ backgroundColor: '#4ECCA3' }}
                         >
                           <FaCheck className="text-xs sm:text-sm" style={{ color: '#0A0A0F' }} />
                         </motion.div>

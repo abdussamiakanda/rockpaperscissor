@@ -30,7 +30,6 @@ export default function Dashboard() {
   })
   const [onlineCount, setOnlineCount] = useState(0)
 
-  // Calculate stats from games
   useEffect(() => {
     if (!user) {
       setStats({ wins: 0, losses: 0, draws: 0, total_games: 0 })
@@ -51,7 +50,6 @@ export default function Dashboard() {
       let totalGames = 0
 
       Object.values(allGames).forEach((game) => {
-        // Only count completed games where user is a player
         if (game.status === 'completed' && 
             (game.player1_id === user.uid || game.player2_id === user.uid)) {
           totalGames++
@@ -61,7 +59,6 @@ export default function Dashboard() {
           } else if (game.winner_id && game.winner_id !== user.uid) {
             losses++
           } else {
-            // winner_id is null, meaning it's a draw
             draws++
           }
         }
@@ -77,7 +74,6 @@ export default function Dashboard() {
     }
   }, [user])
 
-  // Track online players count
   useEffect(() => {
     const profilesRef = ref(db, 'profiles')
     const unsubscribe = onValue(profilesRef, (snapshot) => {
@@ -104,7 +100,6 @@ export default function Dashboard() {
   }, [])
 
   useEffect(() => {
-    // Check for ongoing game on mount
     if (user && profile) {
       checkForOngoingGame()
     }
@@ -115,7 +110,6 @@ export default function Dashboard() {
     if (!user) return
 
     try {
-      // Check profile for current game
       if (profile?.current_game_id) {
         const gameRef = ref(db, `games/${profile.current_game_id}`)
         const gameSnapshot = await get(gameRef)
@@ -130,7 +124,6 @@ export default function Dashboard() {
         }
       }
 
-      // Search for active games where user is a player
       const gamesRef = ref(db, 'games')
       const gamesSnapshot = await get(gamesRef)
       
@@ -143,7 +136,6 @@ export default function Dashboard() {
 
         if (userGame) {
           const [foundGameId] = userGame
-          // Update profile with current game
           const profileRef = ref(db, `profiles/${user.uid}`)
           await update(profileRef, { current_game_id: foundGameId })
           navigate('/game')
@@ -162,7 +154,6 @@ export default function Dashboard() {
     setSearching(true)
 
     try {
-      // Step 1: Search for waiting games (excluding our own)
       const gamesRef = ref(db, 'games')
       const waitingGamesQuery = query(
         gamesRef,
@@ -173,27 +164,20 @@ export default function Dashboard() {
 
       const waitingGamesSnapshot = await get(waitingGamesQuery)
       
-      // Filter out games where we are player1, where player2_id exists, and challenged games (unless we're the challenged user)
       let availableGame = null
       if (waitingGamesSnapshot.exists()) {
         const games = waitingGamesSnapshot.val()
         availableGame = Object.entries(games).find(([gameId, gameData]) => {
-          // Skip if we're player1
           if (gameData.player1_id === user.uid) return false
-          // Skip if player2 already exists
           if (gameData.player2_id) return false
-          // Skip if it's a challenged game and we're not the challenged user
           if (gameData.challenged_user_id && gameData.challenged_user_id !== user.uid) return false
-          // This game is available for us
           return true
         })
       }
 
-      // Step 2: If found, try to join it
       if (availableGame) {
         const [gameId, gameData] = availableGame
         
-        // Double-check the game is still available
         const gameRef = ref(db, `games/${gameId}`)
         const currentGameSnapshot = await get(gameRef)
         
@@ -207,20 +191,18 @@ export default function Dashboard() {
                 updated_at: new Date().toISOString(),
               })
               
-              // Store game ID in profile
               const profileRef = ref(db, `profiles/${user.uid}`)
               await update(profileRef, { current_game_id: gameId })
               setSearching(false)
               navigate('/game')
               return
             } catch (updateError) {
-              // Game may have been taken by another player, continue to create new one
+              // Game may have been taken by another player
             }
           }
         }
       }
 
-      // Step 3: If no waiting games found, create a new one
       const newGameRef = push(ref(db, 'games'))
       const newGame = {
         player1_id: user.uid,
@@ -238,17 +220,13 @@ export default function Dashboard() {
       await update(newGameRef, newGame)
       const gameId = newGameRef.key
       
-      // Store game ID in profile
       const profileRef = ref(db, `profiles/${user.uid}`)
       await update(profileRef, { current_game_id: gameId })
 
-      // Timeout after 30 seconds - cancel the game if no opponent found
       const timeoutId = setTimeout(async () => {
         setSearching(false)
         off(newGameRef, 'value', unsubscribe)
-        // Delete the waiting game
         await remove(newGameRef)
-        // Clear current_game_id from profile
         if (user) {
           try {
             const profileRef = ref(db, `profiles/${user.uid}`)
@@ -259,13 +237,11 @@ export default function Dashboard() {
         }
       }, 30000)
 
-      // Subscribe to game changes - watch for when someone joins our game
       const unsubscribe = onValue(newGameRef, (snapshot) => {
         if (!snapshot.exists()) return
         
         const game = snapshot.val()
         if (game.player2_id && game.status === 'in_progress') {
-          // Clear the timeout since opponent joined
           clearTimeout(timeoutId)
           setSearching(false)
           off(newGameRef, 'value', unsubscribe)
@@ -273,7 +249,6 @@ export default function Dashboard() {
         }
       })
 
-      // Cleanup on unmount
       return () => {
         clearTimeout(timeoutId)
         off(newGameRef, 'value', unsubscribe)
@@ -293,8 +268,8 @@ export default function Dashboard() {
           transition={{ delay: 0.2 }}
           className="card"
         >
-          <h2 className="text-xl sm:text-2xl font-black mb-3 sm:mb-4 uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>Quick Match</h2>
-          <p className="mb-6 text-sm sm:text-base" style={{ color: 'rgba(242, 174, 187, 0.7)' }}>
+          <h2 className="text-xl sm:text-2xl font-black mb-3 sm:mb-4 uppercase tracking-wider" style={{ color: '#EAEAEA' }}>Quick Match</h2>
+          <p className="mb-6 text-sm sm:text-base" style={{ color: 'rgba(234, 234, 234, 0.7)' }}>
             Find an opponent and play a best-of-3 match!
           </p>
           <motion.button
@@ -304,24 +279,24 @@ export default function Dashboard() {
             whileTap={!searching ? { scale: 0.95 } : {}}
             className="w-full flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-black uppercase tracking-wider py-4 sm:py-5 rounded-lg border-2 transition-all"
             style={{
-              backgroundColor: searching ? 'rgba(0, 245, 255, 0.2)' : 'rgba(0, 245, 255, 0.15)',
-              color: '#00F5FF',
-              borderColor: '#00F5FF',
+              backgroundColor: searching ? 'rgba(233, 69, 96, 0.2)' : 'rgba(233, 69, 96, 0.15)',
+              color: '#E94560',
+              borderColor: '#E94560',
             }}
           >
             {searching ? (
               <>
-                <FaSpinner className="animate-spin" style={{ color: '#00F5FF' }} />
+                <FaSpinner className="animate-spin" style={{ color: '#E94560' }} />
                 <span>Searching for opponent...</span>
               </>
             ) : (
               <>
-                <FaPlay style={{ color: '#00F5FF' }} />
+                <FaPlay style={{ color: '#E94560' }} />
                 <span>Find Match</span>
               </>
             )}
           </motion.button>
-          <p className="mt-3 text-center text-xs sm:text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(0, 245, 255, 0.8)' }}>
+          <p className="mt-3 text-center text-xs sm:text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(78, 204, 163, 0.9)' }}>
             {onlineCount} {onlineCount === 1 ? 'player' : 'players'} online
           </p>
         </motion.div>
@@ -332,41 +307,41 @@ export default function Dashboard() {
           transition={{ delay: 0.3 }}
           className="card"
         >
-          <h2 className="text-xl sm:text-2xl font-black mb-3 sm:mb-4 uppercase tracking-wider" style={{ color: 'rgb(242, 174, 187)' }}>Stats</h2>
+          <h2 className="text-xl sm:text-2xl font-black mb-3 sm:mb-4 uppercase tracking-wider" style={{ color: '#EAEAEA' }}>Stats</h2>
           <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
             <div className="rounded-lg p-3 sm:p-4 text-center border-2" style={{
-              backgroundColor: 'rgba(57, 255, 20, 0.15)',
-              borderColor: '#39FF14'
+              backgroundColor: 'rgba(78, 204, 163, 0.15)',
+              borderColor: '#4ECCA3'
             }}>
-              <div className="text-xl sm:text-2xl font-black mb-1" style={{ color: '#39FF14' }}>{stats.wins}</div>
-              <div className="text-xs sm:text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(57, 255, 20, 0.9)' }}>Wins</div>
+              <div className="text-xl sm:text-2xl font-black mb-1" style={{ color: '#4ECCA3' }}>{stats.wins}</div>
+              <div className="text-xs sm:text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(78, 204, 163, 0.9)' }}>Wins</div>
             </div>
             <div className="rounded-lg p-3 sm:p-4 text-center border-2" style={{
-              backgroundColor: 'rgba(191, 26, 26, 0.15)',
-              borderColor: '#BF1A1A'
+              backgroundColor: 'rgba(255, 107, 107, 0.15)',
+              borderColor: '#FF6B6B'
             }}>
-              <div className="text-xl sm:text-2xl font-black mb-1" style={{ color: '#BF1A1A' }}>{stats.losses}</div>
-              <div className="text-xs sm:text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(191, 26, 26, 0.9)' }}>Losses</div>
+              <div className="text-xl sm:text-2xl font-black mb-1" style={{ color: '#FF6B6B' }}>{stats.losses}</div>
+              <div className="text-xs sm:text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(255, 107, 107, 0.9)' }}>Losses</div>
             </div>
             <div className="rounded-lg p-3 sm:p-4 text-center border-2" style={{
-              backgroundColor: 'rgba(255, 215, 0, 0.15)',
-              borderColor: '#FFD700'
+              backgroundColor: 'rgba(244, 209, 96, 0.15)',
+              borderColor: '#F4D160'
             }}>
-              <div className="text-xl sm:text-2xl font-black mb-1" style={{ color: '#FFD700' }}>{stats.draws}</div>
-              <div className="text-xs sm:text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(255, 215, 0, 0.9)' }}>Draws</div>
+              <div className="text-xl sm:text-2xl font-black mb-1" style={{ color: '#F4D160' }}>{stats.draws}</div>
+              <div className="text-xs sm:text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(244, 209, 96, 0.9)' }}>Draws</div>
             </div>
             <div className="rounded-lg p-3 sm:p-4 text-center border-2" style={{
-              backgroundColor: 'rgba(255, 0, 255, 0.15)',
-              borderColor: '#FF00FF'
+              backgroundColor: 'rgba(233, 69, 96, 0.15)',
+              borderColor: '#E94560'
             }}>
-              <div className="text-xl sm:text-2xl font-black mb-1" style={{ color: '#FF00FF' }}>{stats.total_games}</div>
-              <div className="text-xs sm:text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(255, 0, 255, 0.9)' }}>Total</div>
+              <div className="text-xl sm:text-2xl font-black mb-1" style={{ color: '#E94560' }}>{stats.total_games}</div>
+              <div className="text-xs sm:text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(233, 69, 96, 0.9)' }}>Total</div>
             </div>
           </div>
           {stats.total_games > 0 && (
-            <div className="flex justify-between items-center pt-3 mt-2 border-t-2" style={{ borderColor: 'rgba(255, 0, 255, 0.5)' }}>
-              <span className="text-base sm:text-lg font-semibold uppercase tracking-wider" style={{ color: 'rgba(242, 174, 187, 0.9)' }}>Win Rate:</span>
-              <span className="text-lg sm:text-xl font-black" style={{ color: 'rgb(242, 174, 187)' }}>
+            <div className="flex justify-between items-center pt-3 mt-2 border-t-2" style={{ borderColor: 'rgba(233, 69, 96, 0.5)' }}>
+              <span className="text-base sm:text-lg font-semibold uppercase tracking-wider" style={{ color: 'rgba(234, 234, 234, 0.9)' }}>Win Rate:</span>
+              <span className="text-lg sm:text-xl font-black" style={{ color: '#EAEAEA' }}>
                 {Math.round((stats.wins / stats.total_games) * 100)}%
               </span>
             </div>
